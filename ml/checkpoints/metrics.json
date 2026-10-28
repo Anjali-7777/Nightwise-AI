@@ -1,0 +1,7 @@
+{
+  "epochs": 1,
+  "examples": 1200,
+  "intent_accuracy": 0.7,
+  "note": "fallback evaluation; install torch for learned checkpoint",
+  "created_at": 1793184142.2094562
+}
