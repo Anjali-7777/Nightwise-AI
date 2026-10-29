@@ -1,6 +1,6 @@
 {
-  "appId": "ai.nightwise.app",
-  "appName": "NightWise AI",
+  "appId": "ai.safemap.app",
+  "appName": "safeMap",
   "webDir": "frontend",
   "bundledWebRuntime": false,
   "server": {

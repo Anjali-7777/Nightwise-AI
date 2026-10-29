@@ -1,5 +1,5 @@
 // ==========================================================================
-// NightWise AI - Frontend Application Controller (v2)
+// safeMap - Frontend Application Controller
 // OpenStreetMap Primary Engine, OpenFreeMap Vector Tiles & 9-Row Breakdown
 // ==========================================================================
 

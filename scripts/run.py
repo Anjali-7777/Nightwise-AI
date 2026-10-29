@@ -48,7 +48,7 @@ def ensure_ollama_running():
 
 def main():
     print("==================================================")
-    print("      NightWise AI - Safety Navigation Server     ")
+    print("        safeMap - Safety Navigation Server        ")
     print("==================================================")
     ensure_ollama_running()
     

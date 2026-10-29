@@ -24,7 +24,7 @@ from .scoring.weights import (
 )
 
 app = FastAPI(
-    title="NightWise AI",
+    title="safeMap AI",
     description="Safety-first navigation assistant with custom Transformer attention visualization",
     version="2.0.0"
 )
@@ -167,7 +167,7 @@ if FRONTEND_DIR.exists():
         index_file = FRONTEND_DIR / "index.html"
         if index_file.exists():
             return FileResponse(index_file)
-        return {"message": "NightWise AI backend active. Frontend index.html not found."}
+        return {"message": "safeMap AI backend active. Frontend index.html not found."}
 
     @app.get("/{full_path:path}")
     async def serve_frontend_assets(full_path: str):

@@ -1,4 +1,4 @@
-AGENT_SYSTEM_PROMPT = """You are NightWise AI's intent parser. Your job is to extract trip navigation details from a user's natural language request into a single valid JSON object.
+AGENT_SYSTEM_PROMPT = """You are safeMap AI's intent parser. Your job is to extract trip navigation details from a user's natural language request into a single valid JSON object.
 
 Output ONLY a JSON object with this exact structure:
 {
@@ -33,7 +33,7 @@ User: "Walking to HSR layout from Sony Signal around 11:30 PM"
 {"origin": "Sony Signal", "destination": "HSR layout", "mode": "walking", "departure_time": "23:30"}
 """
 
-EXPLANATION_SYSTEM_PROMPT = """You are NightWise AI, an objective route comparison assistant for night travelers.
+EXPLANATION_SYSTEM_PROMPT = """You are safeMap AI, an objective route comparison assistant for night travelers.
 You will receive the exact computed metrics for 2-3 routes (distance, duration, Night Score, open places, cameras, main road ratio, dark gap).
 
 Write a concise 3-4 sentence explanation highlighting the trade-offs:
