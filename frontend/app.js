@@ -342,15 +342,15 @@ function renderWorkflowResults(data) {
     }
   }
 
-  // 2. Agent Explanation & Trace
+  // 2. Agent Explanation & Trace (optional)
   const agentBox = document.getElementById('agent-explanation-box');
   const summaryText = document.getElementById('agent-summary-text');
   const traceList = document.getElementById('agent-trace-list');
   
-  if (data.trade_off_summary) {
+  if (agentBox && data.trade_off_summary) {
     agentBox.classList.remove('hidden');
-    summaryText.textContent = data.trade_off_summary;
-    if (data.trace && data.trace.length) {
+    if (summaryText) summaryText.textContent = data.trade_off_summary;
+    if (traceList && data.trace && data.trace.length) {
       traceList.innerHTML = data.trace.map(t => `<div>• ${t}</div>`).join('');
     }
   }
@@ -492,13 +492,17 @@ function highlightComponent(compKey, routeIndex) {
   updateMapRouteHighlight();
 }
 
-// Toggle Trace
-document.getElementById('toggle-trace-btn').addEventListener('click', () => {
-  const trace = document.getElementById('agent-trace-list');
-  const btn = document.getElementById('toggle-trace-btn');
-  trace.classList.toggle('hidden');
-  btn.textContent = trace.classList.contains('hidden') ? 'View reasoning trace ▾' : 'Hide reasoning trace ▴';
-});
+// Toggle Trace (optional)
+const toggleTraceBtn = document.getElementById('toggle-trace-btn');
+if (toggleTraceBtn) {
+  toggleTraceBtn.addEventListener('click', () => {
+    const trace = document.getElementById('agent-trace-list');
+    if (trace) {
+      trace.classList.toggle('hidden');
+      toggleTraceBtn.textContent = trace.classList.contains('hidden') ? 'View reasoning trace ▾' : 'Hide reasoning trace ▴';
+    }
+  });
+}
 
 // --- Map Update Helpers ---
 function updateMapDisplay() {
