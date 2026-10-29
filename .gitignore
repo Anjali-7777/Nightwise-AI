@@ -1,4 +1,4 @@
-﻿__pycache__/
+__pycache__/
 *.py[cod]
 .venv/
 venv/
@@ -9,3 +9,13 @@ dist/
 *.log
 .vscode/
 .idea/
+.pytest_cache/
+
+# Local model weights and blob storage (downloaded automatically via scripts/setup_models.py)
+models/*
+!models/.gitkeep
+
+# Local OSM cache databases
+data/*.db
+data/*.sqlite
+!data/.gitkeep

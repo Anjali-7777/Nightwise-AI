@@ -1,0 +1,162 @@
+[
+  {
+    "id": 1,
+    "text": "I'm leaving office and walking home at 2 AM, show me the safest way.",
+    "expected": {"origin": "office", "destination": "home", "mode": "walking", "time": "2 AM"}
+  },
+  {
+    "id": 2,
+    "text": "Office se ghar jaana hai raat ko 1 baje walking",
+    "expected": {"origin": "office", "destination": "home", "mode": "walking", "time": "1"}
+  },
+  {
+    "id": 3,
+    "text": "Need to drive from Indiranagar to Koramangala right now",
+    "expected": {"origin": "Indiranagar", "destination": "Koramangala", "mode": "driving", "time": "now"}
+  },
+  {
+    "id": 4,
+    "text": "Show safest route from Church Street to Majestic Station at midnight by car",
+    "expected": {"origin": "Church Street", "destination": "Majestic Station", "mode": "driving", "time": "midnight"}
+  },
+  {
+    "id": 5,
+    "text": "Walking to HSR layout from Sony Signal around 11:30 PM",
+    "expected": {"origin": "Sony Signal", "destination": "HSR layout", "mode": "walking", "time": "11:30 PM"}
+  },
+  {
+    "id": 6,
+    "text": "Raat ke 3 baje college se hostel walk karna hai",
+    "expected": {"origin": "college", "destination": "hostel", "mode": "walking", "time": "3"}
+  },
+  {
+    "id": 7,
+    "text": "Drive me from Connaught Place to Hauz Khas New Delhi at 10 PM",
+    "expected": {"origin": "Connaught Place", "destination": "Hauz Khas", "mode": "driving", "time": "10 PM"}
+  },
+  {
+    "id": 8,
+    "text": "Walk from MG Road Metro to Cubbon Park at 9:00 PM",
+    "expected": {"origin": "MG Road Metro", "destination": "Cubbon Park", "mode": "walking", "time": "9:00 PM"}
+  },
+  {
+    "id": 9,
+    "text": "Bandra Station to Marine Drive driving late night 1:30 AM",
+    "expected": {"origin": "Bandra Station", "destination": "Marine Drive", "mode": "driving", "time": "1:30 AM"}
+  },
+  {
+    "id": 10,
+    "text": "Walking from HITEC City to Jubilee Hills at 11 PM",
+    "expected": {"origin": "HITEC City", "destination": "Jubilee Hills", "mode": "walking", "time": "11 PM"}
+  },
+  {
+    "id": 11,
+    "text": "Going from office to home now by cab",
+    "expected": {"origin": "office", "destination": "home", "mode": "driving", "time": "now"}
+  },
+  {
+    "id": 12,
+    "text": "Ghar se station jana hai subah 4 baje auto se",
+    "expected": {"origin": "ghar", "destination": "station", "mode": "driving", "time": "4"}
+  },
+  {
+    "id": 13,
+    "text": "Need safest pedestrian walkway between Church Street and MG Road",
+    "expected": {"origin": "Church Street", "destination": "MG Road", "mode": "walking", "time": "now"}
+  },
+  {
+    "id": 14,
+    "text": "Driving home from Whitefield at 12:45 AM",
+    "expected": {"origin": "Whitefield", "destination": "home", "mode": "driving", "time": "12:45 AM"}
+  },
+  {
+    "id": 15,
+    "text": "Safest walking way from library to campus",
+    "expected": {"origin": "library", "destination": "campus", "mode": "walking", "time": "now"}
+  },
+  {
+    "id": 16,
+    "text": "Raat ko 2 baje BKC se Bandra car se kaise jaye",
+    "expected": {"origin": "BKC", "destination": "Bandra", "mode": "driving", "time": "2"}
+  },
+  {
+    "id": 17,
+    "text": "Leaving hospital walking to bus stand right now",
+    "expected": {"origin": "hospital", "destination": "bus stand", "mode": "walking", "time": "now"}
+  },
+  {
+    "id": 18,
+    "text": "Walk from Charminar to Hyderabad Station at midnight",
+    "expected": {"origin": "Charminar", "destination": "Hyderabad Station", "mode": "walking", "time": "midnight"}
+  },
+  {
+    "id": 19,
+    "text": "Take me from Delhi University to Connaught Place driving at 8 PM",
+    "expected": {"origin": "Delhi University", "destination": "Connaught Place", "mode": "driving", "time": "8 PM"}
+  },
+  {
+    "id": 20,
+    "text": "Show options to walk home from Indiranagar metro station at 1:00 AM",
+    "expected": {"origin": "Indiranagar metro station", "destination": "home", "mode": "walking", "time": "1:00 AM"}
+  },
+  {
+    "id": 21,
+    "text": "Can I walk safely from Koramangala to HSR layout at 2 AM?",
+    "expected": {"origin": "Koramangala", "destination": "HSR layout", "mode": "walking", "time": "2 AM"}
+  },
+  {
+    "id": 22,
+    "text": "Koramangala to Indiranagar by bike 11 PM",
+    "expected": {"origin": "Koramangala", "destination": "Indiranagar", "mode": "driving", "time": "11 PM"}
+  },
+  {
+    "id": 23,
+    "text": "Walking back home from gym around 10:30 PM",
+    "expected": {"origin": "gym", "destination": "home", "mode": "walking", "time": "10:30 PM"}
+  },
+  {
+    "id": 24,
+    "text": "Mall se ghar drive karna hai 11 baje",
+    "expected": {"origin": "Mall", "destination": "ghar", "mode": "driving", "time": "11"}
+  },
+  {
+    "id": 25,
+    "text": "Need safest walking path from Market Square to Clinic",
+    "expected": {"origin": "Market Square", "destination": "Clinic", "mode": "walking", "time": "now"}
+  },
+  {
+    "id": 26,
+    "text": "Driving from Airport to MG Road at 3:30 AM",
+    "expected": {"origin": "Airport", "destination": "MG Road", "mode": "driving", "time": "3:30 AM"}
+  },
+  {
+    "id": 27,
+    "text": "Late night walking from cafe to hostel at 1 AM",
+    "expected": {"origin": "cafe", "destination": "hostel", "mode": "walking", "time": "1 AM"}
+  },
+  {
+    "id": 28,
+    "text": "Ghar se office walk karke jana hai 6 AM",
+    "expected": {"origin": "Ghar", "destination": "office", "mode": "walking", "time": "6 AM"}
+  },
+  {
+    "id": 29,
+    "text": "Safest drive from Whitefield to Indiranagar at midnight",
+    "expected": {"origin": "Whitefield", "destination": "Indiranagar", "mode": "driving", "time": "midnight"}
+  },
+  {
+    "id": 30,
+    "text": "Leaving clinic walking towards central station now",
+    "expected": {"origin": "clinic", "destination": "central station", "mode": "walking", "time": "now"}
+  },
+  {
+    "id": 31,
+    "text": "Show me routes from Cubbon Park to MG Road walking at 8 PM",
+    "expected": {"origin": "Cubbon Park", "destination": "MG Road", "mode": "walking", "time": "8 PM"}
+  },
+  {
+    "id": 32,
+    "text": "Need to reach home from office by taxi at 2 AM",
+    "expected": {"origin": "office", "destination": "home", "mode": "driving", "time": "2 AM"}
+  }
+]

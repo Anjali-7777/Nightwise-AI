@@ -1,0 +1,559 @@
+{
+  "13.106,77.079_17.761,80.301": [
+    {
+      "id": "cam-synth-1",
+      "lat": 13.110318,
+      "lon": 80.29721,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-4278",
+      "lat": 14.564138999999999,
+      "lon": 80.043333,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-8555",
+      "lat": 16.437177,
+      "lon": 79.553523,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-12832",
+      "lat": 17.204441,
+      "lon": 78.646113,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-17109",
+      "lat": 13.120739,
+      "lon": 80.13814,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-21386",
+      "lat": 13.492931,
+      "lon": 79.125202,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-25663",
+      "lat": 14.237643,
+      "lon": 78.295973,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-29940",
+      "lat": 15.606133999999999,
+      "lon": 77.630868,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-34217",
+      "lat": 17.755967,
+      "lon": 77.188383,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    }
+  ],
+  "12.969,77.603_12.982,77.645": [
+    {
+      "id": "cam-synth-1",
+      "lat": 12.975235999999999,
+      "lon": 77.60746,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-24",
+      "lat": 12.974317,
+      "lon": 77.611382,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-47",
+      "lat": 12.973835,
+      "lon": 77.613727,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-70",
+      "lat": 12.973215,
+      "lon": 77.616909,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-93",
+      "lat": 12.97287,
+      "lon": 77.620093,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-116",
+      "lat": 12.974312,
+      "lon": 77.624037,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-139",
+      "lat": 12.978187,
+      "lon": 77.62846,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-162",
+      "lat": 12.978392,
+      "lon": 77.636767,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-185",
+      "lat": 12.978518,
+      "lon": 77.640823,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    }
+  ],
+  "12.968,77.603_12.982,77.645": [
+    {
+      "id": "cam-synth-1",
+      "lat": 12.975235999999999,
+      "lon": 77.60746,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-80",
+      "lat": 12.972902,
+      "lon": 77.618207,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-159",
+      "lat": 12.978342,
+      "lon": 77.634918,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-238",
+      "lat": 12.973936,
+      "lon": 77.61297,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-317",
+      "lat": 12.975434,
+      "lon": 77.626377,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-396",
+      "lat": 12.978266,
+      "lon": 77.636831,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-475",
+      "lat": 12.972794,
+      "lon": 77.61949200000001,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-554",
+      "lat": 12.977933,
+      "lon": 77.628259,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-633",
+      "lat": 12.978348,
+      "lon": 77.639353,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    }
+  ],
+  "21.141,72.754_27.264,78.000": [
+    {
+      "id": "cam-synth-1",
+      "lat": 27.201088,
+      "lon": 77.993885,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-5271",
+      "lat": 26.443435,
+      "lon": 75.79747,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-10541",
+      "lat": 24.773724,
+      "lon": 74.456832,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-15811",
+      "lat": 23.357703,
+      "lon": 73.66421,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-21081",
+      "lat": 21.40469,
+      "lon": 73.013277,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-26351",
+      "lat": 25.890652,
+      "lon": 76.526195,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-31621",
+      "lat": 23.852982,
+      "lon": 75.220973,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-36891",
+      "lat": 22.879789,
+      "lon": 73.758559,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    }
+  ],
+  "21.134,77.989_27.249,79.992": [
+    {
+      "id": "cam-synth-1",
+      "lat": 27.201088,
+      "lon": 77.993885,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-5997",
+      "lat": 25.382607,
+      "lon": 78.522937,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-11993",
+      "lat": 23.452028,
+      "lon": 79.28247,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-17989",
+      "lat": 22.32825,
+      "lon": 79.443978,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-23985",
+      "lat": 27.178161,
+      "lon": 78.019002,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-29981",
+      "lat": 25.398873,
+      "lon": 79.29955100000001,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-35977",
+      "lat": 23.8479,
+      "lon": 79.596509,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-41973",
+      "lat": 22.244765,
+      "lon": 79.791156,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-47969",
+      "lat": 21.137908,
+      "lon": 79.069046,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    }
+  ],
+  "21.123,79.065_21.143,79.101": [
+    {
+      "id": "cam-synth-1",
+      "lat": 21.127181,
+      "lon": 79.097406,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-41",
+      "lat": 21.134731,
+      "lon": 79.092997,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-81",
+      "lat": 21.138359,
+      "lon": 79.081682,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-121",
+      "lat": 21.128635,
+      "lon": 79.093864,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-161",
+      "lat": 21.137442,
+      "lon": 79.086088,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-201",
+      "lat": 21.137009,
+      "lon": 79.06941400000001,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-241",
+      "lat": 21.134522,
+      "lon": 79.090512,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-281",
+      "lat": 21.138969,
+      "lon": 79.083015,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    }
+  ],
+  "21.128,79.057_21.181,79.100": [
+    {
+      "id": "cam-synth-1",
+      "lat": 21.177271,
+      "lon": 79.062228,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-103",
+      "lat": 21.160951999999998,
+      "lon": 79.079695,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-205",
+      "lat": 21.137764,
+      "lon": 79.087067,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-307",
+      "lat": 21.171591,
+      "lon": 79.06775400000001,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-409",
+      "lat": 21.156012,
+      "lon": 79.086676,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-511",
+      "lat": 21.13759,
+      "lon": 79.09137,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-613",
+      "lat": 21.168886,
+      "lon": 79.069581,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-715",
+      "lat": 21.14604,
+      "lon": 79.08249500000001,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    }
+  ],
+  "17.357,78.468_17.396,78.481": [
+    {
+      "id": "cam-synth-1",
+      "lat": 17.361589,
+      "lon": 78.475018,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-22",
+      "lat": 17.363948,
+      "lon": 78.47525900000001,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-43",
+      "lat": 17.368983,
+      "lon": 78.476434,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-64",
+      "lat": 17.372992,
+      "lon": 78.476369,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-85",
+      "lat": 17.374944,
+      "lon": 78.475256,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-106",
+      "lat": 17.379466,
+      "lon": 78.475025,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-127",
+      "lat": 17.384589,
+      "lon": 78.474349,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-148",
+      "lat": 17.388298,
+      "lon": 78.473815,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    }
+  ],
+  "28.627,77.213_28.646,77.244": [
+    {
+      "id": "cam-synth-1",
+      "lat": 28.631529,
+      "lon": 77.216842,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-21",
+      "lat": 28.632877999999998,
+      "lon": 77.218002,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-41",
+      "lat": 28.633947,
+      "lon": 77.218569,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-61",
+      "lat": 28.634382,
+      "lon": 77.21944400000001,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-81",
+      "lat": 28.634489,
+      "lon": 77.220661,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-101",
+      "lat": 28.637370999999998,
+      "lon": 77.223136,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-121",
+      "lat": 28.642135,
+      "lon": 77.22813000000001,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-141",
+      "lat": 28.642065,
+      "lon": 77.23264300000001,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    },
+    {
+      "id": "cam-synth-161",
+      "lat": 28.641253,
+      "lon": 77.240521,
+      "type": "Traffic / Public CCTV",
+      "operator": "Traffic Police Monitoring"
+    }
+  ]
+}
