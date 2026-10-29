@@ -1,10 +1,16 @@
-# NightWise AI 🌙
+# safeMap 🌙
 
-**A Safety-First Night Navigation Assistant with Grounded GenAI Orchestration & Interactive Transformer Attention Visualizations**
+**Safety-First Night Navigation Platform with Grounded Local GenAI & Interactive Transformer Attention Visualizations**
 
-NightWise AI is an offline/online hybrid navigation platform tailored for night travelers in Indian cities. Instead of presenting only the single fastest route, NightWise computes **2 to 3 distinct alternative corridors side by side**, scoring each route with an explainable, deterministic **Night Activity Score (0–100)** based on mapped environmental-support indicators (active open venues, CCTV surveillance cameras, emergency help points, road classification, and street illumination). 
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688.svg)](https://fastapi.tiangolo.com)
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.2+-EE4C2C.svg)](https://pytorch.org/)
+[![MapLibre GL JS](https://img.shields.io/badge/MapLibre-3.6+-blueviolet.svg)](https://maplibre.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-The app **never decides for the user**; it presents options and trade-offs (e.g. *"Fastest: 10 min, Night Score 38 vs. Safest: 13 min, Night Score 74 with 18 open places and 0 dark gaps"*).
+**safeMap** is an offline/online hybrid navigation platform designed for travelers in Indian cities. Instead of presenting only the single fastest route, safeMap computes **2 to 3 distinct alternative corridors side by side**, scoring each route with an explainable, deterministic **Night Activity Score (0–100)** based on mapped environmental-support indicators (active open venues, CCTV surveillance cameras, emergency help points, road classification, and street illumination).
+
+The app **never decides for the user**; it presents options and trade-offs (e.g. *"Fastest: 10 min, Score 38 vs. Safest: 13 min, Score 74 with 18 open places and 0 dark gaps"*).
 
 ---
 
@@ -15,7 +21,7 @@ flowchart TD
     User([User Voice or Text Query]) --> UI[Frontend: MapLibre GL JS Dark UI]
     
     subgraph Main GenAI Flow
-        UI -->|POST /api/agent| Server[FastAPI Server]
+        UI -->|POST /api/agent| Server[FastAPI Server: main.py]
         Server --> Agent[Agent Orchestrator: agent.py]
         Agent -->|Zero-Temp JSON Extraction| Ollama[Ollama: Qwen2.5-0.5B-Instruct]
         Agent --> Tools[Tool Calling: tools.py]
@@ -25,7 +31,8 @@ flowchart TD
         Tools --> Cameras[services/cameras.py: OSM CCTV Surveillance Nodes]
         Tools --> Roads[services/roads.py: Highway Classes & Lighting]
         Tools --> Hours[services/opening_hours.py: Arrival-Time Dynamic Parser]
-        Tools --> Scoring[scoring/night_score.py: 50m Metric Resampling]
+        Tools --> Cache[services/osm_cache.py: SQLite 0.01° Tile Cache]
+        Tools --> Scoring[scoring/night_score.py: 9-Factor Resampling]
         Scoring --> Gaps[scoring/gaps.py: Dark Gap Penalty Engine]
         Scoring --> Tools
         Tools --> Agent
@@ -52,76 +59,87 @@ flowchart TD
    - Parses complex OSM `opening_hours` syntax (day intervals, overnight 18:00–03:00 shifts, 24/7). A place counts as open **only if open when the user passes it**.
    - Non-linear saturating curves $1 - \exp(-\text{density} / k)$ and 40m cluster deduplication ($1 + 0.3 \times \text{extra}$).
    - Penalizes continuous dark gaps non-linearly ($0.5 \times \text{longest} + 0.3 \times \text{p90} + 0.2 \times (1 - \text{evenness})$).
-   - Fair comparison rescaling (Rule 9) when municipal lighting tags are $< 15\%$.
-2. **Local Isolated GenAI Agent**:
-   - Model weights stored exclusively in `./models/ollama` and `./models/hf` inside the project folder.
-   - Pydantic schema validation with few-shot prompting (including Hinglish and informal phrasing).
-   - Regex fallback parser and numerical guardrail verifying that generated explanations only cite factual numbers from the routing engine.
+   - Fair comparison rescaling when municipal lighting tags are $< 15\%$.
+
+2. **100% Local AI & Privacy-First Architecture**:
+   - Model weights stored exclusively in `./models/ollama` and `./models/hf` inside the project folder. Zero user location data sent to third-party cloud servers.
+   - Pydantic schema validation with few-shot prompting (supports English and Hinglish phrasing like *"office se ghar jaana hai"*).
+   - Numerical guardrail ensuring LLM summaries only cite verified facts from the routing engine.
+
 3. **GenAI Syllabus Mechanics & AI Lab**:
    - From-scratch PyTorch implementation of Multi-Head Attention (MHA) without `nn.MultiheadAttention`, including Sinusoidal Positional Encoding and Causal Masking.
    - Eager attention tensor extraction from HuggingFace `Qwen2.5-0.5B-Instruct` across all 24 layers and 14 heads.
-   - 7-step horizontal storyboard stepper, square amber-to-ink heatmap with crosshairs, 14-head small-multiples grid, layer slider, and vertical SVG decoder block.
-   - Honest scientific callouts highlighting LLM attention sinks.
-4. **"Last Local" Transit Interface**:
-   - Custom SVG logo, transit ticket cards with notched borders and dashed tear lines.
-   - Semi-circular "lamp dial" SVG gauge with animated sweep and score counter.
-   - Light-meter discrete pips (glowing amber) for all 9 score breakdown rows.
-   - Dual-layer glowing street route lines and clustered POIs on OpenFreeMap dark vector tiles.
-   - Warm Paper daylight theme with MapLibre style synchronization and verified Indian emergency helplines (112, 1091, 181, 1090).
+   - Interactive 2D attention matrix heatmap ($QK^T / \sqrt{d_k}$) rendered on HTML5 canvas with layer/head selectors and token attribution.
+
+4. **Robust Mapping & UI**:
+   - MapLibre GL JS vector maps using **OpenFreeMap** dark vector tiles with automatic fallback to **Carto Dark Matter** raster tiles.
+   - Circular SVG Night Score gauge, 9-row glassmorphic breakdown card with interactive component filters, and category-coded POI markers.
+   - Voice search via browser Web Speech API.
+   - Mobile-ready container via **CapacitorJS**.
 
 ---
 
-## Design System: "Last Local" Transit Aesthetic
+## Technology Stack
 
-NightWise rejects generic startup templates and purple gradients in favor of **"Last Local"**: an editorial aesthetic inspired by late-night Indian city transit signage, paper tickets, and sodium-vapor streetlights reflecting off asphalt.
-
-### 1. Typography
-Self-hosted `.woff2` files in `frontend/fonts/` with `@font-face` and `font-display: swap`:
-- **Headlines & Display**: *Instrument Serif* (with italic styling for poetic emphasis: *"still awake"*).
-- **Interface & Prose**: *Bricolage Grotesque* (variable weight, high legibility).
-- **Metrics & Telemetry**: *Martian Mono* (monospaced durations, points, coordinates, and confidence badges).
-
-### 2. Palette & Themes
-- **Night Asphalt (Default Dark)**: `--ink-950: #0A0B14`, `--ink-900: #11131F`, text `#ECE6D8`, sodium-lamp amber accent `--sodium: #FFB547` (`rgba(255, 181, 71, 0.22)` glow).
-- **Warm Paper (Classroom Light)**: `--paper-50: #F4EDE0`, ink `#1B1A17`, accessible dark amber `#B8650A`. Theme toggle persists to `localStorage` and synchronizes MapLibre vector styles.
-- **Semantic Accents**: Safe route mint `#6FE3B5`, dark gap coral `#FF5D5D`, fastest route steel-cyan `#7FC8F8`.
-
-### 3. Captured Screenshots (`docs/screenshots/`)
-
-| Viewport | Theme | Screenshot |
+| Category | Technologies | Purpose |
 |---|---|---|
-| **Desktop (1440 $\times$ 900)** | **Night Asphalt (Dark)** | ![Desktop Dark](docs/screenshots/desktop_1440x900_dark.png) |
-| **Desktop (1440 $\times$ 900)** | **Warm Paper (Light)** | ![Desktop Light](docs/screenshots/desktop_1440x900_light.png) |
-| **AI Lab (1440 $\times$ 900)** | **Transformer Visualizer** | ![AI Lab](docs/screenshots/desktop_ai_lab.png) |
-| **Score Matrix (1440 $\times$ 900)** | **Dynamic Weights & Slider** | ![Score Explainer](docs/screenshots/desktop_score_explainer.png) |
-| **Tablet (768 $\times$ 1024)** | **Responsive Rail** | ![Tablet View](docs/screenshots/tablet_768x1024_dark.png) |
-| **Mobile (390 $\times$ 844)** | **Mobile Transit View** | ![Mobile View](docs/screenshots/mobile_390x844_dark.png) |
+| **Frontend** | HTML5, CSS3, JavaScript (Vanilla ES6+), HTML5 Canvas API | Reactive, dark OLED UI and 2D attention visualizers |
+| **Mapping Engine** | MapLibre GL JS, OpenFreeMap, Carto Dark Matter, OpenStreetMap | Interactive WebGL vector & raster mapping |
+| **Backend & API** | Python 3.10+, FastAPI, Uvicorn, HTTPX | High-concurrency async web server and REST API |
+| **Data & Geometry** | Shapely, PyProj, SQLite 3, Geoapify API | Spatial buffering, polyline geometry, and 0.01° tile caching |
+| **Routing** | OSRM (`routed-foot`, `routed-car`), Valhalla | Multi-alternative routing engine with overlap deduplication |
+| **Local AI Models** | Qwen2.5-0.5B-Instruct, Ollama | Local natural language intent extraction and trade-off synthesis |
+| **Deep Learning** | PyTorch (`torch`), Hugging Face `transformers`, `accelerate` | Multi-head attention extraction across 24 layers |
+| **Mobile Shell** | CapacitorJS | Cross-platform runtime wrapper for Android and iOS |
+| **Testing** | Pytest, AnyIO | 26 automated unit, regression, and real-city tests |
 
 ---
 
 ## Setup & Quick Start
 
-### 1. Requirements
-- Windows, macOS, or Linux.
-- Python 3.10+ (tested with Python 3.14).
-- Ollama installed on the system.
+### 1. Prerequisites
+- **OS**: Windows, macOS, or Linux.
+- **Python**: Version 3.10+ (tested up to Python 3.14).
+- **Ollama**: Installed on the system ([ollama.com](https://ollama.com)).
 
-### 2. Virtual Environment Setup
+### 2. Clone Repository & Setup Virtual Environment
+
+#### On Windows (PowerShell):
 ```powershell
+# Clone repository
+git clone https://github.com/Anjali-7777/Nightwise-AI.git
+cd Nightwise-AI
+
 # Create and activate virtual environment
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 
-# Install project dependencies
-python -m pip install -r requirements.txt
+# Install dependencies
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+#### On Linux / macOS (Bash / Zsh):
+```bash
+# Clone repository
+git clone https://github.com/Anjali-7777/Nightwise-AI.git
+cd Nightwise-AI
+
+# Create and activate virtual environment
+python3 -m venv .venv
+source .venv/bin/activate
+
+# Install dependencies
+pip install --upgrade pip
+pip install -r requirements.txt
 ```
 
 ### 3. Environment Variables
 Copy `.env.example` to `.env`:
-```powershell
-Copy-Item .env.example .env
+```bash
+cp .env.example .env
 ```
-Key configuration entries:
+Default configuration:
 ```env
 GEOAPIFY_API_KEY=your_key_here    # Free key from geoapify.com (optional; system includes offline gazetteer & OSM fallbacks)
 OLLAMA_MODELS=./models/ollama     # Models isolated strictly within the project folder
@@ -132,30 +150,31 @@ NIGHTWISE_HOST=127.0.0.1
 NIGHTWISE_PORT=8000
 ```
 
-### 4. Automatic Model Download & Verification
-Run the automated idempotent setup script:
-```powershell
+### 4. Download Local AI Models (One-Time Setup)
+Run the automated setup script to pull the local models into the `./models/` directory:
+```bash
 python scripts/setup_models.py
 ```
 This script:
-- Creates `models/ollama/` and `models/hf/`.
-- Starts Ollama with `OLLAMA_MODELS` bound to the local project directory.
-- Pulls `qwen2.5:0.5b-instruct` into `./models/ollama`.
-- Downloads `Qwen/Qwen2.5-0.5B-Instruct` into `./models/hf` using `snapshot_download`.
-- Runs verification inference on both engines.
+- Creates isolated `./models/ollama` and `./models/hf` folders.
+- Pulls `qwen2.5:0.5b-instruct` into Ollama.
+- Downloads `Qwen/Qwen2.5-0.5B-Instruct` for Hugging Face transformer attention extraction.
 
 ### 5. Run the Application
-```powershell
+Start the unified application server:
+```bash
 python scripts/run.py
 ```
 Open your browser at:
-**http://127.0.0.1:8000**
+- **Main App**: [http://127.0.0.1:8000](http://127.0.0.1:8000)
+- **Nagpur Sample Corridor**: [http://127.0.0.1:8000/?origin=RUB+College+Nagpur&dest=VR+Mall+Nagpur](http://127.0.0.1:8000/?origin=RUB+College+Nagpur&dest=VR+Mall+Nagpur)
+- **Transformer Attention Explorer**: [http://127.0.0.1:8000/#attention](http://127.0.0.1:8000/#attention)
 
 ---
 
 ## Scoring Formula & Weights (v2 Engine)
 
-The NightWise v2 scoring engine evaluates routes deterministically using 9 distinct urban environmental components. Walking and driving use independent weight tables calibrated to mode-specific vulnerabilities, each summing to exactly 100 max points.
+The safeMap v2 scoring engine evaluates routes deterministically using 9 distinct urban environmental components. Walking and driving use independent weight tables calibrated to mode-specific vulnerabilities, each summing to exactly 100 max points.
 
 $$\text{Score} = \max\left(0, \min\left(100, \sum_{i=1}^{9} \text{Points}_i \times \text{RescaleFactor}\right)\right)$$
 
@@ -183,57 +202,47 @@ $$\text{Score} = \max\left(0, \min\left(100, \sum_{i=1}^{9} \text{Points}_i \tim
    Venues located within 40m of one another count as $1.0 + 0.3 \times \text{extras}$. A commercial mall with 20 shops is recognized as a single cluster rather than 20 individual checkpoints.
 3. **Deep-Night Time Factor (01:00–04:00 AM)**:
    Venues that are not 24/7 or essential emergency services receive an automatic 0.6x dampener during the deep-night window (01:00 to 04:00), capturing the realistic drop in pedestrian foot traffic.
-4. **Fair Comparison Rescaling (Rule 9)**:
-   When municipal data for a component is unavailable across an area (e.g. lighting tags $< 15\%$ and zero mapped street lamps), the component is marked unavailable and the remaining 8 components are rescaled proportionally to 100 max points:
+4. **Fair Comparison Rescaling**:
+   When municipal data for a component is unavailable across an area (e.g. lighting tags $< 15\%$ and zero mapped street lamps), the component is marked unavailable and the remaining components are rescaled proportionally to 100 max points:
    $$\text{RescaleFactor} = \frac{100.0}{\sum_{c \in \text{Available}} W_c}$$
-   This guarantees routes in developing or under-mapped localities are never unfairly penalized against heavily-tagged localities.
 5. **Data Confidence Badge**:
-   Evaluates tag density per km and mapped opening hours share to surface a `High`, `Medium`, or `Low` confidence badge, accompanied by a prominent warning if data is sparse.
+   Evaluates tag density per km and mapped opening hours share to surface a `High`, `Medium`, or `Low` confidence badge.
 
 ---
 
-## OpenStreetMap Primary Architecture & SQLite Caching
+## Operational Scripts & Utilities
 
-- **Primary Source**: OpenStreetMap queried via Overpass API with a multi-mirror failover rotator (`overpass-api.de`, `overpass.kumi.systems`, `overpass.private.coffee`), 25s timeout, exponential backoff, and concurrency rate limiting.
-- **SQLite Tile Cache (`data/osm_cache.db`)**:
-  - Automatically caches Overpass node and way data indexed by 0.01° grid tiles (~1.1 km $\times$ 1.1 km).
-  - 7-day Time-To-Live (TTL) with sub-10ms query times.
-  - Offline capability: `python scripts/prefetch_city.py "CityName"` pre-fetches and indexes municipal areas in advance.
-- **Geoapify Role**: Demoted to autocomplete search and supplementary places provider (deduplicated against OSM within 25m and 0.4 name string similarity).
-- **Map Vector Tiles**: OpenFreeMap dark vector tiles (`https://tiles.openfreemap.org/styles/dark`) served with full MapLibre GL JS interactivity and OpenStreetMap attribution.
+- **Prefetch City for Fast Offline Use**:
+  ```bash
+  python scripts/prefetch_city.py --city "Nagpur"
+  ```
+  Downloads and indexes OSM corridors into `./data/osm_cache.db` so routing runs offline and avoids public Overpass rate-limits.
 
----
+- **Run Automated Test Suite (26 Tests)**:
+  ```bash
+  pytest -v tests/
+  ```
 
-## Automated Tests & Ablation
+- **Verify Live Endpoints**:
+  ```bash
+  python scripts/verify_live.py
+  ```
 
-### Run PyTest Suite
-```powershell
-pytest -v tests/
-```
-The test suite validates:
-- `test_opening_hours.py`: 24/7 parsing, overnight shifts (18:00–03:00), weekday closures, and unknown fallback weights.
-- `test_attention.py`: Scratch attention tensor dimensions, causal masking, and softmax row sum normalization ($\sum_j A_{ij} = 1.0$).
-- `test_scoring.py`: Closed venues do not count; CCTV presence raises scores; evenly spread activity outperforms clustered activity; walking and driving weights differ.
-- `test_agent_parsing.py`: Evaluates parser accuracy across 32 varied real-world queries in `tests/queries.json`.
-
-### Run Weight Ablation Experiment
-```powershell
-python scripts/ablation.py
-```
-Outputs empirical score deltas showing how scores change with and without cameras and with and without gap penalties.
+- **Run Scoring Ablation Study**:
+  ```bash
+  python scripts/ablation.py
+  ```
 
 ---
 
-## Limitations & Ethical Notice
+## Ethical & Privacy Principles
 
-1. **Not a Crime Prediction or Safety Guarantee**: The score is an objective environmental-support index reflecting physical urban indicators. It cannot predict criminal behavior or guarantee safety.
-2. **OpenStreetMap Data Completeness**: Absence of a mapped streetlight or camera does not prove darkness or lack of surveillance. Unknown opening hours are discounted to 0.3 weight.
-3. **Small Language Model Guardrail**: While `qwen2.5:0.5b-instruct` is extremely lightweight and fast for offline execution, all outputs are validated against deterministic schemas and raw figures.
+1. **Local Compute First**: Your routes, timestamps, and locations remain on your device.
+2. **Objective Environmental Index**: Night Activity Score measures mapped infrastructure (lighting, active venues, emergency help points), not crime prediction algorithms.
+3. **User Agency**: The platform never forces a single route—it empowers the traveler with transparent trade-offs.
 
 ---
 
-## Future Work
+## License
 
-- Integration of municipal streetlight telemetry (where available via smart city APIs).
-- Live crowdsourced hazard reporting and temporary detour notices.
-- Direct Bluetooth / SMS emergency contact sharing via Capacitor mobile builds.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
