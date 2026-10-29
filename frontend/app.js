@@ -645,7 +645,8 @@ window.addEventListener('load', () => {
   setupAutocomplete('dest-input', 'dest-autocomplete');
 
   if (window.location.hash === '#attention' || window.location.hash === '#attn') {
-    document.getElementById('tab-attn-btn').click();
+    const tabBtn = document.getElementById('tab-attn-btn');
+    if (tabBtn) tabBtn.click();
   }
 
   // Support preloading routes via URL query parameters
