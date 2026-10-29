@@ -4,6 +4,8 @@
 // ==========================================================================
 
 let map = null;
+let isMapReady = false;
+let fallbackAttempted = false;
 let currentRoutes = [];
 let selectedRouteIndex = 0;
 let currentPlaces = [];
@@ -21,9 +23,34 @@ const CATEGORY_COLORS = {
   cameras: "#cbd5e1"
 };
 
-// --- Map Initialization with OpenFreeMap Vector Tiles ---
+// Fallback Standalone Carto Dark Raster Style
+const CARTO_DARK_STYLE = {
+  version: 8,
+  sources: {
+    'carto-dark': {
+      type: 'raster',
+      tiles: [
+        'https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
+        'https://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
+        'https://c.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png'
+      ],
+      tileSize: 256,
+      attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
+    }
+  },
+  layers: [
+    {
+      id: 'carto-dark-layer',
+      type: 'raster',
+      source: 'carto-dark',
+      minzoom: 0,
+      maxzoom: 20
+    }
+  ]
+};
+
+// --- Map Initialization with OpenFreeMap Vector Tiles & Robust Fallbacks ---
 async function initMap() {
-  // Primary: OpenFreeMap Dark Vector Style
   let mapStyle = "https://tiles.openfreemap.org/styles/dark";
 
   try {
@@ -44,14 +71,70 @@ async function initMap() {
     console.warn("Using fallback map style:", err);
   }
 
-  map = new maplibregl.Map({
-    container: 'map',
-    style: mapStyle,
-    center: [77.6200, 12.9750], // Default center
-    zoom: 13
-  });
+  try {
+    map = new maplibregl.Map({
+      container: 'map',
+      style: mapStyle,
+      center: [79.0882, 21.1458], // Nagpur / Central India default
+      zoom: 12
+    });
 
-  map.addControl(new maplibregl.NavigationControl(), 'top-right');
+    map.addControl(new maplibregl.NavigationControl(), 'top-right');
+
+    map.on('load', () => {
+      isMapReady = true;
+      map.resize();
+      if (currentRoutes && currentRoutes.length) {
+        updateMapDisplay();
+      }
+    });
+
+    map.on('error', (e) => {
+      console.warn("MapLibre event error:", e);
+      if (!fallbackAttempted) {
+        fallbackAttempted = true;
+        try {
+          map.setStyle(CARTO_DARK_STYLE);
+        } catch (stErr) {
+          console.error("Failed setting fallback style:", stErr);
+        }
+      }
+    });
+
+    // Safety timeout: if after 3s style is still not ready, switch to Carto Dark raster
+    setTimeout(() => {
+      if (!isMapReady && !fallbackAttempted) {
+        console.warn("Primary vector style load timeout, switching to Carto Dark raster...");
+        fallbackAttempted = true;
+        try {
+          map.setStyle(CARTO_DARK_STYLE);
+        } catch (e) {}
+      }
+    }, 3000);
+
+  } catch (err) {
+    console.error("Map creation error:", err);
+    try {
+      map = new maplibregl.Map({
+        container: 'map',
+        style: CARTO_DARK_STYLE,
+        center: [79.0882, 21.1458],
+        zoom: 12
+      });
+      map.on('load', () => {
+        isMapReady = true;
+        map.resize();
+      });
+    } catch (e2) {
+      console.error("Fatal map initialization failure:", e2);
+    }
+  }
+
+  window.addEventListener('resize', () => {
+    if (map) {
+      try { map.resize(); } catch (e) {}
+    }
+  });
 }
 
 // --- Live Autocomplete Search (Geoapify) ---
@@ -506,10 +589,12 @@ if (toggleTraceBtn) {
 
 // --- Map Update Helpers ---
 function updateMapDisplay() {
-  if (!map || !map.isStyleLoaded()) {
-    setTimeout(updateMapDisplay, 250);
+  if (!map) return;
+  if (!isMapReady && !map.isStyleLoaded()) {
+    setTimeout(updateMapDisplay, 200);
     return;
   }
+  try { map.resize(); } catch(e){}
 
   // Clear existing markers
   mapMarkers.forEach(m => m.remove());
@@ -552,10 +637,14 @@ function updateMapDisplay() {
 
   // Fit bounds to selected route
   const selRoute = currentRoutes[selectedRouteIndex];
-  const selCoords = selRoute.coordinates;
-  const bounds = new maplibregl.LngLatBounds();
-  selCoords.forEach(c => bounds.extend([c[1], c[0]]));
-  map.fitBounds(bounds, { padding: 60 });
+  if (selRoute && selRoute.coordinates && selRoute.coordinates.length) {
+    const selCoords = selRoute.coordinates;
+    const bounds = new maplibregl.LngLatBounds();
+    selCoords.forEach(c => bounds.extend([c[1], c[0]]));
+    try {
+      map.fitBounds(bounds, { padding: 60, maxZoom: 16 });
+    } catch(e) {}
+  }
 
   // Add Place Pins with Arrival-Time Dimming
   currentPlaces.forEach(p => {
