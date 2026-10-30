@@ -19,50 +19,82 @@ def regex_fallback_parser(text: str) -> dict:
 
     # 2. Time detection
     dep_time = "now"
-    time_match = re.search(r'(\d{1,2}(?::\d{2})?\s*(?:am|pm|a\.m\.|p\.m\.|baje|hrs|hours?))', t)
-    if time_match:
-        dep_time = time_match.group(1).replace("baje", "").strip()
-    elif "midnight" in t or "aadhi raat" in t:
+    night_time_match = re.search(r'(\d{1,2}(?::\d{2})?)\s*(?:at night|in the night|night|pm|p\.m\.|am|a\.m\.|baje|hrs|hours?)', t)
+    if "midnight" in t or "aadhi raat" in t:
         dep_time = "00:00"
+    elif night_time_match:
+        num_part = night_time_match.group(1)
+        if "at night" in t or "in the night" in t or "pm" in t or "p.m." in t:
+            try:
+                h = int(num_part.split(":")[0])
+                m = num_part.split(":")[1] if ":" in num_part else "00"
+                if h == 12:
+                    dep_time = f"00:{m}" if "night" in t else f"12:{m}"
+                elif h < 12 and ("night" in t or "pm" in t):
+                    dep_time = f"{h+12:02d}:{m}"
+                else:
+                    dep_time = f"{h:02d}:{m}"
+            except Exception:
+                dep_time = night_time_match.group(0).strip()
+        else:
+            dep_time = night_time_match.group(0).strip()
+    elif "night" in t or "raat" in t:
+        dep_time = "23:00"
+    else:
+        time_match = re.search(r'(\d{1,2}(?::\d{2})?\s*(?:am|pm|a\.m\.|p\.m\.|baje|hrs|hours?))', t)
+        if time_match:
+            dep_time = time_match.group(1).replace("baje", "").strip()
+
+    # Pre-clean conversational intents and filler prefixes before extracting endpoints
+    cleaned_t = t
+    cleaned_t = re.sub(r'\b(?:it\'?s|it is)\s+\d{1,2}(?::\d{2})?\s*(?:at night|in the night|am|pm)?\b', '', cleaned_t)
+    cleaned_t = re.sub(r'\b(?:i\s+)?(?:want|need|have|plan|wish|would like)\s+to\s+(?:go|travel|head|commute|reach|get|walk|drive)\s+from\b', 'from', cleaned_t)
+    cleaned_t = re.sub(r'\b(?:i\s+)?(?:want|need|have|plan|wish|would like)\s+to\s+(?:go|travel|head|commute|reach|get|walk|drive)\s+to\b', 'to', cleaned_t)
+    cleaned_t = re.sub(r'\b(?:show|give|find|navigate|take)\s+(?:me\s+)?(?:the\s+)?(?:route|safest route|way|directions)?\s+from\b', 'from', cleaned_t)
+    cleaned_t = re.sub(r'\b(?:i want to|want to|need to|how to|can i|help me)\s+(?:go|travel|reach|walk|drive)\b', '', cleaned_t)
 
     # 3. Origin & Destination detection
     origin = ""
     destination = ""
 
     # Pattern A: "from X to Y"
-    from_to = re.search(r'(?:from|starting at|leaving)\s+([^,]+?)\s+(?:to|heading to|towards)\s+([^,]+?)(?:\s+at|\s+by|\s+in|\s+walking|\s+driving|$)', t)
+    from_to = re.search(r'(?:from|starting at|leaving)\s+([^,]+?)\s+(?:to|heading to|towards)\s+([^,]+?)(?:\s+at|\s+by|\s+in|\s+walking|\s+driving|$)', cleaned_t)
     if from_to:
         origin = from_to.group(1).strip()
         destination = from_to.group(2).strip()
 
     # Pattern B: Hinglish "X se Y" (e.g., "office se ghar")
     if not origin or not destination:
-        hinglish = re.search(r'([^,]+?)\s+se\s+([^,]+?)(?:\s+jaana|\s+raat|\s+at|\s+by|\s+walking|\s+driving|$)', t)
+        hinglish = re.search(r'([^,]+?)\s+se\s+([^,]+?)(?:\s+jaana|\s+raat|\s+at|\s+by|\s+walking|\s+driving|$)', cleaned_t)
         if hinglish:
             origin = hinglish.group(1).strip()
             destination = hinglish.group(2).strip()
 
     # Pattern C: "to Y from X"
-    to_from = re.search(r'(?:to|towards)\s+([^,]+?)\s+from\s+([^,]+?)(?:\s+around|\s+at|\s+by|\s+walking|\s+driving|$)', t)
-    if to_from:
-        destination = to_from.group(1).strip()
-        origin = to_from.group(2).strip()
+    if not origin or not destination:
+        to_from = re.search(r'(?:to|towards)\s+([^,]+?)\s+from\s+([^,]+?)(?:\s+around|\s+at|\s+by|\s+walking|\s+driving|$)', cleaned_t)
+        if to_from:
+            cand_dest = to_from.group(1).strip()
+            cand_orig = to_from.group(2).strip()
+            if cand_dest.lower() not in {"go", "reach", "travel", "head", "commute", "walk", "drive", "get"}:
+                destination = cand_dest
+                origin = cand_orig
 
     # Pattern D: "from X" alone
     if not origin:
-        from_alone = re.search(r'from\s+([^,]+?)(?:\s+at|\s+around|\s+by|\s+walking|\s+driving|$)', t)
+        from_alone = re.search(r'from\s+([^,]+?)(?:\s+at|\s+around|\s+by|\s+walking|\s+driving|$)', cleaned_t)
         if from_alone:
             origin = from_alone.group(1).strip()
 
     # Pattern E: "X to Y"
     if not origin or not destination:
-        to_pat = re.search(r'([^,]+?)\s+to\s+([^,]+?)(?:\s+at|\s+by|\s+around|\s+walking|\s+driving|$)', t)
+        to_pat = re.search(r'([^,]+?)\s+to\s+([^,]+?)(?:\s+at|\s+by|\s+around|\s+walking|\s+driving|$)', cleaned_t)
         if to_pat:
             if not origin: origin = to_pat.group(1).strip()
             if not destination: destination = to_pat.group(2).strip()
 
     # Clean recognized keywords out of origin/destination
-    noise = ["walking", "driving", "safest", "safest way", "show me", "i am", "i'm", "going", "leave", "leaving", "need to"]
+    noise = ["walking", "driving", "safest", "safest way", "show me", "i am", "i'm", "going", "leave", "leaving", "need to", "want to", "go to", "go"]
     for n in noise:
         origin = re.sub(rf'\b{n}\b', '', origin).strip()
         destination = re.sub(rf'\b{n}\b', '', destination).strip()
@@ -85,11 +117,11 @@ def regex_fallback_parser(text: str) -> dict:
         "departure_time": dep_time
     }
 
-async def call_ollama_json(prompt: str, system: str, retries: int = 2) -> Optional[dict]:
-    """Calls Ollama with temperature=0 and format='json' with retry loop."""
+async def call_ollama_json(prompt: str, system: str, retries: int = 1) -> Optional[dict]:
+    """Calls Ollama with temperature=0 and format='json' with fast context options."""
     for attempt in range(retries + 1):
         try:
-            async with httpx.AsyncClient(timeout=15.0) as client:
+            async with httpx.AsyncClient(timeout=4.0) as client:
                 res = await client.post(
                     f"{OLLAMA_HOST}/api/generate",
                     json={
@@ -98,7 +130,7 @@ async def call_ollama_json(prompt: str, system: str, retries: int = 2) -> Option
                         "prompt": prompt,
                         "format": "json",
                         "stream": False,
-                        "options": {"temperature": 0.0}
+                        "options": {"temperature": 0.0, "num_predict": 128, "num_ctx": 1024}
                     }
                 )
                 if res.status_code == 200:
@@ -111,15 +143,23 @@ async def call_ollama_json(prompt: str, system: str, retries: int = 2) -> Option
     return None
 
 async def parse_user_request(text: str, saved_places: dict | None = None) -> ParsedUserQuery:
-    """Parses user natural query using Ollama + strict Pydantic validation + regex fallback."""
-    extracted = await call_ollama_json(
-        prompt=f'Extract navigation parameters from: "{text}"',
-        system=AGENT_SYSTEM_PROMPT
-    )
-
-    if not extracted:
-        # Fall back to deterministic regex parser
-        extracted = regex_fallback_parser(text)
+    """Parses user natural query using fast deterministic regex first, then Ollama + strict Pydantic validation."""
+    fast_parsed = regex_fallback_parser(text)
+    t = text.lower()
+    
+    # If the user query directly matches origin and destination, use fast parser (0.001s vs 5s)
+    has_origin = fast_parsed["origin"].lower() in t or (saved_places and fast_parsed["origin"].lower() in saved_places)
+    has_dest = fast_parsed["destination"].lower() in t or (saved_places and fast_parsed["destination"].lower() in saved_places)
+    
+    if has_origin and has_dest:
+        extracted = fast_parsed
+    else:
+        extracted = await call_ollama_json(
+            prompt=f'Extract navigation parameters from: "{text}"',
+            system=AGENT_SYSTEM_PROMPT
+        )
+        if not extracted:
+            extracted = fast_parsed
 
     # Resolve saved places
     saved = saved_places or {}
@@ -222,7 +262,7 @@ async def generate_explanation(workflow_res: dict) -> str:
     Write a 3-sentence grounded trade-off summary according to your instructions.
     """
     try:
-        async with httpx.AsyncClient(timeout=8.0) as client:
+        async with httpx.AsyncClient(timeout=2.5) as client:
             res = await client.post(
                 f"{OLLAMA_HOST}/api/generate",
                 json={
@@ -230,7 +270,7 @@ async def generate_explanation(workflow_res: dict) -> str:
                     "system": EXPLANATION_SYSTEM_PROMPT,
                     "prompt": prompt,
                     "stream": False,
-                    "options": {"temperature": 0.2}
+                    "options": {"temperature": 0.2, "num_predict": 80, "num_ctx": 1024}
                 }
             )
             if res.status_code == 200:
@@ -278,5 +318,12 @@ async def run_agent(message: str, saved_places: dict | None = None) -> AgentChat
         fastest_route_id=workflow_res["fastest_route_id"],
         trade_off_summary=explanation,
         trace=trace,
-        disclaimer=DISCLAIMER_TEXT
+        disclaimer=DISCLAIMER_TEXT,
+        origin=workflow_res.get("origin"),
+        destination=workflow_res.get("destination"),
+        data_confidence=workflow_res.get("data_confidence"),
+        confidence_warning=workflow_res.get("confidence_warning"),
+        trade_off=workflow_res.get("trade_off"),
+        corridor_places=workflow_res.get("corridor_places", []),
+        corridor_cameras=workflow_res.get("corridor_cameras", [])
     )

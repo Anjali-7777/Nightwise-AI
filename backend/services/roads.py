@@ -16,7 +16,7 @@ async def fetch_road_attributes_in_corridor(coords: List[List[float]]) -> List[D
     if not coords:
         return []
 
-    min_lat, min_lon, max_lat, max_lon = get_bounding_box(coords, buffer_deg=0.005)
+    min_lat, min_lon, max_lat, max_lon = get_bounding_box(coords, buffer_deg=0.008)
     osm_bundle = await fetch_osm_corridor_features(min_lat, min_lon, max_lat, max_lon)
     raw_roads = osm_bundle.get("roads", [])
 
@@ -40,7 +40,7 @@ async def fetch_road_attributes_in_corridor(coords: List[List[float]]) -> List[D
 
 async def fetch_corridor_lighting_and_landuse(coords: List[List[float]]) -> Dict[str, Any]:
     """Returns street lamps, lit ways, and isolating land use zones along corridor."""
-    min_lat, min_lon, max_lat, max_lon = get_bounding_box(coords, buffer_deg=0.006)
+    min_lat, min_lon, max_lat, max_lon = get_bounding_box(coords, buffer_deg=0.008)
     osm_bundle = await fetch_osm_corridor_features(min_lat, min_lon, max_lat, max_lon)
     return {
         "street_lamps": osm_bundle.get("street_lamps", []),

@@ -26,6 +26,10 @@ def parse_time_string(time_str: str) -> datetime:
             h += 12
         elif meridiem == "am" and h == 12:
             h = 0
+        elif "night" in s and h == 12:
+            h = 0
+        elif "night" in s and 1 <= h <= 11:
+            h += 12
         try:
             return now.replace(hour=h, minute=m, second=0, microsecond=0)
         except ValueError:
@@ -183,6 +187,6 @@ async def execute_route_workflow(
             "safest_dark_gap": safest_route["metrics"]["longest_dark_gap_m"],
             "fastest_dark_gap": fastest_route["metrics"]["longest_dark_gap_m"]
         },
-        "corridor_places": places,
+        "corridor_places": list(places) + list(transport),
         "corridor_cameras": cameras
     }

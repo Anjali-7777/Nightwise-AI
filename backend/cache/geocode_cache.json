@@ -1,1 +1,259 @@
-{}
+{
+  "vr mall nagour": [
+    {
+      "name": "VR Mall, Pillayar Koil Street, Zone 7 Ambattur, Chennai - 600105, TN, India",
+      "lat": 13.079402,
+      "lon": 80.1978426,
+      "address": "VR Mall, Pillayar Koil Street, Zone 7 Ambattur, Chennai - 600105, TN, India",
+      "provider": "geoapify"
+    },
+    {
+      "name": "VR Mall, Dumas Road, Surat - 394518, GJ, India",
+      "lat": 21.1450222,
+      "lon": 72.7573191,
+      "address": "VR Mall, Dumas Road, Surat - 394518, GJ, India",
+      "provider": "geoapify"
+    },
+    {
+      "name": "VR Chennai Mall, Metrozone Driveway, Zone 7 Ambattur, Chennai - 600105, TN, India",
+      "lat": 13.0811478,
+      "lon": 80.195997,
+      "address": "VR Chennai Mall, Metrozone Driveway, Zone 7 Ambattur, Chennai - 600105, TN, India",
+      "provider": "geoapify"
+    },
+    {
+      "name": "Trillium Mall, Bus Stand Road, Gandhi Baug, Nagpur - 440003, MH, India",
+      "lat": 21.1329587,
+      "lon": 79.0963161,
+      "address": "Trillium Mall, Bus Stand Road, Gandhi Baug, Nagpur - 440003, MH, India",
+      "provider": "geoapify"
+    },
+    {
+      "name": "SR Mall, Vrindawan Lane, Vijay Nagar, Jabalpur - 482003, MP, India",
+      "lat": 23.1918396,
+      "lon": 79.9120148,
+      "address": "SR Mall, Vrindawan Lane, Vijay Nagar, Jabalpur - 482003, MP, India",
+      "provider": "geoapify"
+    },
+    {
+      "name": "Central Mall Nagpur, North Ambazari Road, Ramdaspeth, Nagpur - 440010, MH, India",
+      "lat": 21.1377319,
+      "lon": 79.068821,
+      "address": "Central Mall Nagpur, North Ambazari Road, Ramdaspeth, Nagpur - 440010, MH, India",
+      "provider": "geoapify"
+    },
+    {
+      "name": "Empress Mall, Shri Bejonji Mehta Road, Gandhi Baug, Nagpur - 440018, MH, India",
+      "lat": 21.1480882,
+      "lon": 79.0932382,
+      "address": "Empress Mall, Shri Bejonji Mehta Road, Gandhi Baug, Nagpur - 440018, MH, India",
+      "provider": "geoapify"
+    },
+    {
+      "name": "Satyam Fashion Mall, Chitar Oli Road, Mahal, Nagpur - 440032, MH, India",
+      "lat": 21.1481118,
+      "lon": 79.1086639,
+      "address": "Satyam Fashion Mall, Chitar Oli Road, Mahal, Nagpur - 440032, MH, India",
+      "provider": "geoapify"
+    }
+  ],
+  "railway station": [
+    {
+      "name": "Kendujhar, India",
+      "lat": 21.7857695,
+      "lon": 85.524392,
+      "address": "Kendujhar, India",
+      "provider": "geoapify"
+    },
+    {
+      "name": "Azhiyur, Kozhikode, India",
+      "lat": 11.697914,
+      "lon": 75.5449292,
+      "address": "Azhiyur, Kozhikode, India",
+      "provider": "geoapify"
+    },
+    {
+      "name": "Railway Station, K.B. Extension, Davanagere - 577000, KA, India",
+      "lat": 14.467778,
+      "lon": 75.9229609,
+      "address": "Railway Station, K.B. Extension, Davanagere - 577000, KA, India",
+      "provider": "geoapify"
+    },
+    {
+      "name": "Railway Station Park, Railway Station Road, Jamnagar - 361001, GJ, India",
+      "lat": 22.4925821,
+      "lon": 70.0536598,
+      "address": "Railway Station Park, Railway Station Road, Jamnagar - 361001, GJ, India",
+      "provider": "geoapify"
+    },
+    {
+      "name": "Jogbani - 854328, BR, India",
+      "lat": 26.4008409,
+      "lon": 87.2624222,
+      "address": "Jogbani - 854328, BR, India",
+      "provider": "geoapify"
+    },
+    {
+      "name": "Railway Station East-side road, Talap, Kannur - 670017, KL, India",
+      "lat": 11.874334,
+      "lon": 75.3687385,
+      "address": "Railway Station East-side road, Talap, Kannur - 670017, KL, India",
+      "provider": "geoapify"
+    },
+    {
+      "name": "Railway Station Bathinda, Paras Ram Nagar, Bathinda - 151001, PB, India",
+      "lat": 30.2127955,
+      "lon": 74.933099,
+      "address": "Railway Station Bathinda, Paras Ram Nagar, Bathinda - 151001, PB, India",
+      "provider": "geoapify"
+    },
+    {
+      "name": "Kuruppanthara, Manjoor - 686603, KL, India",
+      "lat": 9.7297415,
+      "lon": 76.5037751,
+      "address": "Kuruppanthara, Manjoor - 686603, KL, India",
+      "provider": "geoapify"
+    }
+  ],
+  "travel": [
+    {
+      "name": "Coimbatore Tours And Travel Agency, Uppilipalayam, Singanallur, East Zone, Coimbatore South, Coimbatore, Tamil Nadu, India",
+      "lat": 11.0012314,
+      "lon": 77.0303205,
+      "address": "Coimbatore Tours And Travel Agency, Uppilipalayam, Singanallur, East Zone, Coimbatore South, Coimbatore, Tamil Nadu, India",
+      "provider": "nominatim"
+    },
+    {
+      "name": "Madhurima Travels - Best taxi service in Lucknow | Cab hire in Lucknow | Travel Agency Lucknow, Lucknow, Uttar Pradesh, 226026, India",
+      "lat": 26.9333322,
+      "lon": 80.9467198,
+      "address": "Madhurima Travels - Best taxi service in Lucknow | Cab hire in Lucknow | Travel Agency Lucknow, Lucknow, Uttar Pradesh, 226026, India",
+      "provider": "nominatim"
+    },
+    {
+      "name": "Time For Travel, Street A, Satya Niketan, Moti Bagh, South, Delhi, South Delhi, Delhi, 110021, India",
+      "lat": 28.5880317,
+      "lon": 77.1687171,
+      "address": "Time For Travel, Street A, Satya Niketan, Moti Bagh, South, Delhi, South Delhi, Delhi, 110021, India",
+      "provider": "nominatim"
+    },
+    {
+      "name": "Oum Travel, Sadar Bazar Road, Sadar Bazar, Delhi Cantonment, New Delhi, Delhi, 110046, India",
+      "lat": 28.5950744,
+      "lon": 77.1227496,
+      "address": "Oum Travel, Sadar Bazar Road, Sadar Bazar, Delhi Cantonment, New Delhi, Delhi, 110046, India",
+      "provider": "nominatim"
+    },
+    {
+      "name": "Neo Travel, Terminal 2B Road, Delhi Cantonment, New Delhi, Delhi, 110077, India",
+      "lat": 28.5592572,
+      "lon": 77.0881917,
+      "address": "Neo Travel, Terminal 2B Road, Delhi Cantonment, New Delhi, Delhi, 110077, India",
+      "provider": "nominatim"
+    }
+  ],
+  "go": [
+    {
+      "name": "Go, Dharchula, Pithoragarh district, Uttarakhand, India",
+      "lat": 30.2604897,
+      "lon": 80.5405945,
+      "address": "Go, Dharchula, Pithoragarh district, Uttarakhand, India",
+      "provider": "nominatim"
+    }
+  ],
+  "main railway station nagpur": [
+    {
+      "name": "Nagpur Railway Station, Platform 4/5 Ramp, Mominpura, Nagpur - 440002, MH, India",
+      "lat": 21.1513767,
+      "lon": 79.0904355,
+      "address": "Nagpur Railway Station, Platform 4/5 Ramp, Mominpura, Nagpur - 440002, MH, India",
+      "provider": "geoapify"
+    },
+    {
+      "name": "Railway Station, Kingsway Road, Mominpura, Nagpur - 440001, MH, India",
+      "lat": 21.1537029,
+      "lon": 79.086261,
+      "address": "Railway Station, Kingsway Road, Mominpura, Nagpur - 440001, MH, India",
+      "provider": "geoapify"
+    },
+    {
+      "name": "Nagpur Junction railway station, Platform 2/3 Ramp, Mominpura, Nagpur - 440002, MH, India",
+      "lat": 21.1523731,
+      "lon": 79.0882365,
+      "address": "Nagpur Junction railway station, Platform 2/3 Ramp, Mominpura, Nagpur - 440002, MH, India",
+      "provider": "geoapify"
+    },
+    {
+      "name": "Ajni Railway Station, Dhantoli, Nagpur - 411010, MH, India",
+      "lat": 21.1275955,
+      "lon": 79.0829364,
+      "address": "Ajni Railway Station, Dhantoli, Nagpur - 411010, MH, India",
+      "provider": "geoapify"
+    },
+    {
+      "name": "Humpyard Road/ Ajni Railway Station Road, Dhantoli, Nagpur - 411010, MH, India",
+      "lat": 21.1278226,
+      "lon": 79.082562,
+      "address": "Humpyard Road/ Ajni Railway Station Road, Dhantoli, Nagpur - 411010, MH, India",
+      "provider": "geoapify"
+    },
+    {
+      "name": "Ajni Railway Station, Dhantoli, Nagpur - 440012, MH, India",
+      "lat": 21.1377316,
+      "lon": 79.0860003,
+      "address": "Ajni Railway Station, Dhantoli, Nagpur - 440012, MH, India",
+      "provider": "geoapify"
+    },
+    {
+      "name": "Senior Section Engineer (Works) Central Railway, Humpyard Road/ Ajni Railway Station Road, Dhantoli, Nagpur - 411010, MH, India",
+      "lat": 21.1270118,
+      "lon": 79.0850018,
+      "address": "Senior Section Engineer (Works) Central Railway, Humpyard Road/ Ajni Railway Station Road, Dhantoli, Nagpur - 411010, MH, India",
+      "provider": "geoapify"
+    },
+    {
+      "name": "Nagaur Railway Station Road, Nagaur - 341001, RJ, India",
+      "lat": 27.2000117,
+      "lon": 73.7237044,
+      "address": "Nagaur Railway Station Road, Nagaur - 341001, RJ, India",
+      "provider": "geoapify"
+    }
+  ],
+  "main railway station": [
+    {
+      "name": "Railway Station, Main Road, Lodhikheda, Vijaygram Colony, Lodhikeda, Lodhikheda, Sausar Tahsil, Pandhurna, Madhya Pradesh, 480108, India",
+      "lat": 21.5801262,
+      "lon": 78.8548159,
+      "address": "Railway Station, Main Road, Lodhikheda, Vijaygram Colony, Lodhikeda, Lodhikheda, Sausar Tahsil, Pandhurna, Madhya Pradesh, 480108, India",
+      "provider": "nominatim"
+    },
+    {
+      "name": "Sheshadri Puram 1st Main Road;baby nagar to perungudi railway station road, Baby Nagar, Ward 179, Zone 13 Adyar, Chennai, Chennai Metropolitan Area, Velachery, Chennai District, Tamil Nadu, 600042, India",
+      "lat": 12.9800744,
+      "lon": 80.2298248,
+      "address": "Sheshadri Puram 1st Main Road;baby nagar to perungudi railway station road, Baby Nagar, Ward 179, Zone 13 Adyar, Chennai, Chennai Metropolitan Area, Velachery, Chennai District, Tamil Nadu, 600042, India",
+      "provider": "nominatim"
+    },
+    {
+      "name": "Chikka Banavar Railway Station Road - Mallasandra Main Road, Mallasandra, Bengaluru North City Corporation, Bengaluru, Bangalore North, Bengaluru Urban, Karnataka, 560015, India",
+      "lat": 13.0597515,
+      "lon": 77.5188469,
+      "address": "Chikka Banavar Railway Station Road - Mallasandra Main Road, Mallasandra, Bengaluru North City Corporation, Bengaluru, Bangalore North, Bengaluru Urban, Karnataka, 560015, India",
+      "provider": "nominatim"
+    },
+    {
+      "name": "Chikka Banavar Railway Station Road - Mallasandra Main Road, Mallasandra, Bengaluru North City Corporation, Bengaluru, Bangalore North, Bengaluru Urban, Karnataka, 560057, India",
+      "lat": 13.0569911,
+      "lon": 77.5087266,
+      "address": "Chikka Banavar Railway Station Road - Mallasandra Main Road, Mallasandra, Bengaluru North City Corporation, Bengaluru, Bangalore North, Bengaluru Urban, Karnataka, 560057, India",
+      "provider": "nominatim"
+    },
+    {
+      "name": "Chikka Banavar Railway Station Road - Mallasandra Main Road, MEI Layout, Bagalagunte, Bengaluru North City Corporation, Bengaluru, Bangalore North, Bengaluru Urban, Karnataka, 560057, India",
+      "lat": 13.056804,
+      "lon": 77.5079192,
+      "address": "Chikka Banavar Railway Station Road - Mallasandra Main Road, MEI Layout, Bagalagunte, Bengaluru North City Corporation, Bengaluru, Bangalore North, Bengaluru Urban, Karnataka, 560057, India",
+      "provider": "nominatim"
+    }
+  ]
+}

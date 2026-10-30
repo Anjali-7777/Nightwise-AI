@@ -1,6 +1,7 @@
 import math
+import time
 import logging
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Tuple
 import httpx
 from ..config import GEOAPIFY_API_KEY, USER_AGENT
 from .overpass_client import fetch_osm_corridor_features
@@ -11,6 +12,10 @@ HELP_POINT_CATEGORIES = {
     "police", "hospital", "clinic", "doctors", "pharmacy",
     "petrol_pump", "fire_station", "emergency_phone"
 }
+
+# In-memory LRU-like cache for Geoapify responses
+_GEOAPIFY_CACHE: Dict[str, Tuple[float, List[Dict[str, Any]]]] = {}
+_CACHE_TTL_SECONDS = 3600.0  # 1 hour
 
 def haversine_dist_m(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     R = 6371000
@@ -38,13 +43,22 @@ def get_bounding_box(coords: List[List[float]], buffer_deg: float = 0.008) -> tu
     )
 
 async def fetch_supplementary_geoapify_places(min_lat: float, min_lon: float, max_lat: float, max_lon: float) -> List[Dict[str, Any]]:
-    """Supplementary places from Geoapify Places API."""
+    """Supplementary places from Geoapify Places API with fast memory caching."""
     if not GEOAPIFY_API_KEY:
         return []
+
+    # Quantize bounding box to ~0.005 deg (~500m) for high cache hit rate
+    cache_key = f"{round(min_lat, 3)},{round(min_lon, 3)},{round(max_lat, 3)},{round(max_lon, 3)}"
+    now = time.time()
+    if cache_key in _GEOAPIFY_CACHE:
+        ts, cached_places = _GEOAPIFY_CACHE[cache_key]
+        if now - ts < _CACHE_TTL_SECONDS:
+            return cached_places
+
     try:
         cats = "commercial.supermarket,catering.restaurant,catering.cafe,service.financial.atm,healthcare.pharmacy,healthcare.hospital,service.police,service.vehicle.fuel"
         url = f"https://api.geoapify.com/v2/places?categories={cats}&filter=rect:{min_lon},{min_lat},{max_lon},{max_lat}&limit=60&apiKey={GEOAPIFY_API_KEY}"
-        async with httpx.AsyncClient(timeout=4.0) as client:
+        async with httpx.AsyncClient(timeout=2.0) as client:
             resp = await client.get(url, headers={"User-Agent": USER_AGENT})
             if resp.status_code == 200:
                 features = resp.json().get("features", [])
@@ -74,9 +88,10 @@ async def fetch_supplementary_geoapify_places(min_lat: float, min_lon: float, ma
                         "is_24x7": "24/7" in op_hours.lower() or cat in ["police", "hospital"],
                         "source": "geoapify"
                     })
+                _GEOAPIFY_CACHE[cache_key] = (now, results)
                 return results
     except Exception as e:
-        logger.warning(f"Geoapify supplementary fetch skipped: {e}")
+        logger.warning(f"Geoapify supplementary fetch skipped or timed out: {e}")
     return []
 
 async def fetch_places_in_corridor(coords: List[List[float]]) -> List[Dict[str, Any]]:
@@ -99,16 +114,20 @@ async def fetch_places_in_corridor(coords: List[List[float]]) -> List[Dict[str, 
     # 2. Supplementary: Geoapify Places
     geo_places = await fetch_supplementary_geoapify_places(min_lat, min_lon, max_lat, max_lon)
 
-    # 3. Merge & Deduplicate
+    # 3. Merge & Deduplicate with spatial fast-pruning
     merged = list(osm_places)
 
     for gp in geo_places:
+        gp_lat, gp_lon = gp["lat"], gp["lon"]
         is_dup = False
         for op in merged:
-            d = haversine_dist_m(gp["lat"], gp["lon"], op["lat"], op["lon"])
+            op_lat, op_lon = op["lat"], op["lon"]
+            # Fast degree box filter before trigonometric calculation
+            if abs(gp_lat - op_lat) > 0.0006 or abs(gp_lon - op_lon) > 0.0006:
+                continue
+            d = haversine_dist_m(gp_lat, gp_lon, op_lat, op_lon)
             if d < 25.0:
                 is_dup = True
-                # If OSM had no opening hours, enrich with Geoapify hours
                 if not op.get("opening_hours") and gp.get("opening_hours"):
                     op["opening_hours"] = gp["opening_hours"]
                     op["is_24x7"] = gp["is_24x7"]

@@ -81,12 +81,14 @@ async def health_check():
 
 @app.get("/api/config")
 async def get_app_config():
-    """Returns runtime client configuration for OpenFreeMap vector styles and fallbacks."""
+    """Returns runtime client configuration for map styles and fallbacks."""
+    geo_dark_style = f"https://maps.geoapify.com/v1/styles/dark-matter/style.json?apiKey={GEOAPIFY_API_KEY}" if GEOAPIFY_API_KEY else ""
     return {
-        "primary_map_style": "https://tiles.openfreemap.org/styles/dark",
+        "primary_map_style": geo_dark_style or "https://tiles.openfreemap.org/styles/dark",
+        "openfreemap_style": "https://tiles.openfreemap.org/styles/dark",
+        "geoapify_style": geo_dark_style,
         "fallback_map_style": "https://tiles.openfreemap.org/styles/liberty",
-        "carto_dark_tiles": "https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
-        "map_style_url": "https://tiles.openfreemap.org/styles/dark",
+        "osm_raster_tiles": "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
         "geoapify_key": GEOAPIFY_API_KEY,
         "geoapify_configured": bool(GEOAPIFY_API_KEY)
     }
@@ -162,19 +164,25 @@ async def api_attention(payload: dict):
 if FRONTEND_DIR.exists():
     app.mount("/static", StaticFiles(directory=str(FRONTEND_DIR)), name="static")
 
+    NO_CACHE_HEADERS = {
+        "Cache-Control": "no-cache, no-store, must-revalidate",
+        "Pragma": "no-cache",
+        "Expires": "0"
+    }
+
     @app.get("/")
     async def serve_index():
         index_file = FRONTEND_DIR / "index.html"
         if index_file.exists():
-            return FileResponse(index_file)
+            return FileResponse(index_file, headers=NO_CACHE_HEADERS)
         return {"message": "safeMap AI backend active. Frontend index.html not found."}
 
     @app.get("/{full_path:path}")
     async def serve_frontend_assets(full_path: str):
         file_path = FRONTEND_DIR / full_path
         if file_path.is_file():
-            return FileResponse(file_path)
+            return FileResponse(file_path, headers=NO_CACHE_HEADERS)
         index_file = FRONTEND_DIR / "index.html"
         if index_file.exists():
-            return FileResponse(index_file)
+            return FileResponse(index_file, headers=NO_CACHE_HEADERS)
         raise HTTPException(status_code=404, detail="File not found")

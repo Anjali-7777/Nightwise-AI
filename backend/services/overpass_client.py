@@ -65,17 +65,17 @@ def build_corridor_overpass_query(min_lat: float, min_lon: float, max_lat: float
     out body center;
     """
 
-async def query_overpass_raw(query_str: str, retries: int = 2) -> Optional[Dict[str, Any]]:
+async def query_overpass_raw(query_str: str, retries: int = 1) -> Optional[Dict[str, Any]]:
     """
-    Executes an Overpass QL query with mirror rotation, 25s timeout,
+    Executes an Overpass QL query with fast mirror rotation, 6s timeout,
     exponential backoff, and async semaphore throttling.
     """
     async with _OVERPASS_SEMAPHORE:
         for attempt in range(retries + 1):
             mirror = get_next_mirror()
-            backoff = 1.0 * (2 ** attempt)
+            backoff = 0.5 * (2 ** attempt)
             try:
-                async with httpx.AsyncClient(timeout=25.0) as client:
+                async with httpx.AsyncClient(timeout=6.0) as client:
                     resp = await client.post(
                         mirror,
                         data={"data": query_str},
@@ -215,14 +215,26 @@ def parse_osm_elements(elements: List[Dict[str, Any]]) -> Dict[str, Any]:
         "isolating_landuse": isolating_landuse
     }
 
+# In-memory fast corridor bundle cache
+_OSM_BUNDLE_CACHE: Dict[str, Any] = {}
+_BUNDLE_CACHE_TTL = 300.0
+
 async def fetch_osm_corridor_features(min_lat: float, min_lon: float, max_lat: float, max_lon: float) -> Dict[str, Any]:
     """
     High-level fetcher:
-    1. Checks local SQLite 0.01-deg tile cache.
-    2. Identifies any missing tiles.
-    3. Fetches missing tiles from Overpass mirrors.
-    4. Merges and returns deduplicated corridor features.
+    1. Checks fast in-memory corridor cache.
+    2. Checks local SQLite 0.01-deg tile cache.
+    3. Identifies any missing tiles.
+    4. Fetches missing tiles from Overpass mirrors.
+    5. Merges and returns deduplicated corridor features.
     """
+    cache_key = f"{round(min_lat, 4)},{round(min_lon, 4)},{round(max_lat, 4)},{round(max_lon, 4)}"
+    now = time.time()
+    if cache_key in _OSM_BUNDLE_CACHE:
+        ts, cached_bundle = _OSM_BUNDLE_CACHE[cache_key]
+        if now - ts < _BUNDLE_CACHE_TTL:
+            return cached_bundle
+
     tiles = osm_cache.get_tiles_for_bbox(min_lat, min_lon, max_lat, max_lon)
     missing_tiles = []
     cached_data_list = []
@@ -273,7 +285,7 @@ async def fetch_osm_corridor_features(min_lat: float, min_lon: float, max_lat: f
         for r in d.get("roads", []): merged_roads[r["id"]] = r
         for u in d.get("isolating_landuse", []): merged_landuse[u["id"]] = u
 
-    return {
+    result = {
         "places": list(merged_places.values()),
         "transport": list(merged_transport.values()),
         "cameras": list(merged_cameras.values()),
@@ -281,3 +293,5 @@ async def fetch_osm_corridor_features(min_lat: float, min_lon: float, max_lat: f
         "roads": list(merged_roads.values()),
         "isolating_landuse": list(merged_landuse.values())
     }
+    _OSM_BUNDLE_CACHE[cache_key] = (now, result)
+    return result

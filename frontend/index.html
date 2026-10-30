@@ -23,13 +23,6 @@
         </div>
       </div>
 
-      <nav class="tab-nav">
-        <button id="tab-nav-btn" class="tab-btn active" data-tab="nav-panel">Navigation & Routes</button>
-        <button id="tab-attn-btn" class="tab-btn" data-tab="attn-panel">
-          <span class="sparkle">✦</span> How the AI Understood You
-        </button>
-      </nav>
-
       <div class="header-status">
         <span id="model-status-pill" class="status-pill status-ready">● Model Ready</span>
       </div>
@@ -172,120 +165,9 @@
         </div>
       </section>
 
-      <!-- TAB 2: TRANSFORMER ATTENTION EXPLORER -->
-      <section id="attn-panel" class="tab-content hidden">
-        <div class="attention-dashboard">
-          <div class="attn-header">
-            <div>
-              <h2>How the Transformer Understood Your Request</h2>
-              <p class="muted">Visualizing self-attention weights from Qwen2.5-0.5B-Instruct & our PyTorch implementation</p>
-            </div>
-            <div class="attn-controls">
-              <label>Layer:
-                <select id="layer-select"></select>
-              </label>
-              <label>Head:
-                <select id="head-select">
-                  <option value="avg">Average of all heads</option>
-                  <option value="0">Head 0 (Syntactic)</option>
-                  <option value="1">Head 1 (Positional)</option>
-                  <option value="2">Head 2 (Semantic / Entity)</option>
-                  <option value="3">Head 3 (Long-range)</option>
-                </select>
-              </label>
-            </div>
-          </div>
-
-          <!-- Token Sequence Display -->
-          <div class="tokens-section">
-            <span class="section-label">Extracted Token Sequence (Click a token to highlight its attention):</span>
-            <div id="tokens-container" class="token-pills-row"></div>
-            <div id="token-tooltip" class="token-tooltip hidden"></div>
-          </div>
-
-          <!-- Attention Focus Summary -->
-          <div class="focus-summary-box">
-            <span class="section-label">Key Safety Words Attention Allocation:</span>
-            <div id="focus-chips" class="focus-chips-row"></div>
-          </div>
-
-          <!-- Heatmap Canvas & Side-by-Side Comparison -->
-          <div class="heatmaps-grid">
-            <div class="heatmap-card">
-              <div class="heatmap-title">
-                <h3>Real Model Attention (HuggingFace Eager Output)</h3>
-                <span class="tag-badge">Qwen2.5-0.5B-Instruct</span>
-              </div>
-              <p class="caption">Causal attention matrix: token \(i\) attends to preceding tokens \(j \le i\).</p>
-              <div class="canvas-scroll-wrap">
-                <canvas id="hf-heatmap-canvas" width="460" height="460"></canvas>
-              </div>
-            </div>
-
-            <div class="heatmap-card">
-              <div class="heatmap-title">
-                <h3>Scratch PyTorch Attention (From-Scratch Multi-Head)</h3>
-                <span class="tag-badge green">Custom Implementation</span>
-              </div>
-              <p class="caption">Scaled dot-product attention \( \text{softmax}(QK^T / \sqrt{d_k}) \) with sinusoidal positional encoding.</p>
-              <div class="canvas-scroll-wrap">
-                <canvas id="scratch-heatmap-canvas" width="460" height="460"></canvas>
-              </div>
-            </div>
-          </div>
-
-          <!-- Academic Architecture & Theory Panel -->
-          <div class="theory-grid">
-            <!-- Architecture Parameters -->
-            <div class="theory-card">
-              <h3>Qwen2.5 Decoder-Only Architecture</h3>
-              <div id="arch-specs" class="specs-grid">
-                <!-- Injected via attention.js -->
-              </div>
-              <div class="mermaid-diagram-wrap">
-                <svg viewBox="0 0 400 240" class="arch-svg">
-                  <rect x="20" y="10" width="360" height="30" rx="6" fill="#1e293b" stroke="#38bdf8"/>
-                  <text x="200" y="30" text-anchor="middle" fill="#e2e8f0" font-size="12">Input Tokens + RoPE (Rotary Position Embeddings)</text>
-                  
-                  <rect x="20" y="55" width="360" height="40" rx="6" fill="#1e293b" stroke="#818cf8"/>
-                  <text x="200" y="80" text-anchor="middle" fill="#e2e8f0" font-size="12">RMSNorm ➔ Multi-Head Self-Attention (Q, K, V Projections)</text>
-                  
-                  <rect x="20" y="110" width="360" height="40" rx="6" fill="#1e293b" stroke="#818cf8"/>
-                  <text x="200" y="135" text-anchor="middle" fill="#e2e8f0" font-size="12">Residual Connection (+) ➔ RMSNorm</text>
-
-                  <rect x="20" y="165" width="360" height="35" rx="6" fill="#1e293b" stroke="#34d399"/>
-                  <text x="200" y="188" text-anchor="middle" fill="#e2e8f0" font-size="12">SwiGLU Feed-Forward Network (Intermediate size: 4864)</text>
-
-                  <rect x="20" y="210" width="360" height="25" rx="6" fill="#1e293b" stroke="#f59e0b"/>
-                  <text x="200" y="227" text-anchor="middle" fill="#e2e8f0" font-size="11">RMSNorm ➔ Output Linear Projection (Vocab size: 151,936)</text>
-                </svg>
-              </div>
-            </div>
-
-            <!-- Concept Explainers -->
-            <div class="theory-card">
-              <h3>Core GenAI Concepts (Syllabus Guide)</h3>
-              <div class="concept-item">
-                <strong>1. Scaled Dot-Product Attention:</strong>
-                <p>Computes similarity between the <em>Query</em> vector of a current word and <em>Key</em> vectors of all prior words, scaled by \( \sqrt{d_k} \) to avoid exploding gradients in large dimensions.</p>
-              </div>
-              <div class="concept-item">
-                <strong>2. Multi-Head Attention:</strong>
-                <p>Splits hidden vectors into multiple heads so the model can simultaneously focus on syntax (verbs), entities (places), and timing constraints ("2 AM").</p>
-              </div>
-              <div class="concept-item">
-                <strong>3. Why Attention Heatmaps Matter:</strong>
-                <p>Reveals how the model extracts intent: when parsing "walking home at 2 AM", high attention weights flow from "safest" to "walking" and "2 AM", configuring night-time weights rather than daytime driving heuristics.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
     </main>
   </div>
 
   <script src="/app.js"></script>
-  <script src="/attention.js"></script>
 </body>
 </html>

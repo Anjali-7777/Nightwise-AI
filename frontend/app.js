@@ -19,37 +19,69 @@ const CATEGORY_COLORS = {
   pharmacy: "#10b981",
   petrol_pump: "#f97316",
   shop: "#eab308",
+  restaurant: "#eab308",
+  cafe: "#eab308",
+  atm: "#eab308",
+  bank: "#eab308",
+  food: "#eab308",
   transport: "#a855f7",
   cameras: "#cbd5e1"
 };
 
-// Fallback Standalone Carto Dark Raster Style
-const CARTO_DARK_STYLE = {
+function getEnabledFeatureCategories() {
+  const enabled = new Set();
+  document.querySelectorAll('.map-legend input[type="checkbox"]').forEach(cb => {
+    if (cb.checked) {
+      const cat = cb.dataset.cat;
+      enabled.add(cat);
+      if (cat === 'shop') {
+        enabled.add('restaurant');
+        enabled.add('cafe');
+        enabled.add('atm');
+        enabled.add('bank');
+        enabled.add('food');
+      }
+    }
+  });
+  return enabled;
+}
+
+function setupLegendFilters() {
+  document.querySelectorAll('.map-legend input[type="checkbox"]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      updateMapDisplay();
+    });
+  });
+}
+
+// Clean Keyless OpenStreetMap Raster Dark Style (Zero Watermarks, Zero API Keys Required)
+const OSM_DARK_STYLE = {
   version: 8,
   sources: {
-    'carto-dark': {
+    'osm-tiles': {
       type: 'raster',
       tiles: [
-        'https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
-        'https://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
-        'https://c.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png'
+        'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
       ],
       tileSize: 256,
-      attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors'
     }
   },
   layers: [
     {
-      id: 'carto-dark-layer',
+      id: 'osm-tiles-layer',
       type: 'raster',
-      source: 'carto-dark',
-      minzoom: 0,
-      maxzoom: 20
+      source: 'osm-tiles',
+      paint: {
+        'raster-brightness-max': 0.65,
+        'raster-contrast': 0.25,
+        'raster-saturation': -0.7
+      }
     }
   ]
 };
 
-// --- Map Initialization with OpenFreeMap Vector Tiles & Robust Fallbacks ---
+// --- Map Initialization with Vector Tiles & Robust Keyless Fallbacks ---
 async function initMap() {
   let mapStyle = "https://tiles.openfreemap.org/styles/dark";
 
@@ -68,7 +100,7 @@ async function initMap() {
       }
     }
   } catch (err) {
-    console.warn("Using fallback map style:", err);
+    console.warn("Using default map style:", err);
   }
 
   try {
@@ -89,35 +121,30 @@ async function initMap() {
       }
     });
 
+    // Only fall back to keyless OSM tiles if the initial style definition itself fails to load
     map.on('error', (e) => {
-      console.warn("MapLibre event error:", e);
-      if (!fallbackAttempted) {
+      const errStr = String(e && e.error ? e.error.message || e.error : e || "");
+      // Ignore routine glyph, sprite, or tile 404s
+      if (errStr.includes("glyphs") || errStr.includes("sprite") || errStr.includes("404")) {
+        return;
+      }
+      if (!isMapReady && !fallbackAttempted) {
         fallbackAttempted = true;
+        console.warn("Primary vector style load failed, switching to clean keyless OSM Dark fallback...");
         try {
-          map.setStyle(CARTO_DARK_STYLE);
+          map.setStyle(OSM_DARK_STYLE);
         } catch (stErr) {
           console.error("Failed setting fallback style:", stErr);
         }
       }
     });
 
-    // Safety timeout: if after 3s style is still not ready, switch to Carto Dark raster
-    setTimeout(() => {
-      if (!isMapReady && !fallbackAttempted) {
-        console.warn("Primary vector style load timeout, switching to Carto Dark raster...");
-        fallbackAttempted = true;
-        try {
-          map.setStyle(CARTO_DARK_STYLE);
-        } catch (e) {}
-      }
-    }, 3000);
-
   } catch (err) {
     console.error("Map creation error:", err);
     try {
       map = new maplibregl.Map({
         container: 'map',
-        style: CARTO_DARK_STYLE,
+        style: OSM_DARK_STYLE,
         center: [79.0882, 21.1458],
         zoom: 12
       });
@@ -195,23 +222,6 @@ function setupAutocomplete(inputId, dropdownId) {
     }
   });
 }
-
-// --- Tab Switching ---
-document.querySelectorAll('.tab-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
-    
-    btn.classList.add('active');
-    const targetId = btn.dataset.tab;
-    const targetContent = document.getElementById(targetId);
-    if (targetContent) targetContent.classList.remove('hidden');
-
-    if (targetId === 'nav-panel' && map) {
-      setTimeout(() => map.resize(), 200);
-    }
-  });
-});
 
 // --- Mode Toggle ---
 document.querySelectorAll('.mode-btn').forEach(btn => {
@@ -294,9 +304,13 @@ async function triggerAgentQuery() {
   sendBtn.disabled = true;
 
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 35000);
+
     const res = await fetch('/api/agent', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      signal: controller.signal,
       body: JSON.stringify({
         message: query,
         saved_places: {
@@ -305,6 +319,7 @@ async function triggerAgentQuery() {
         }
       })
     });
+    clearTimeout(timeoutId);
 
     if (!res.ok) {
       const err = await res.json();
@@ -312,13 +327,28 @@ async function triggerAgentQuery() {
     }
 
     const data = await res.json();
-    renderWorkflowResults(data);
 
-    if (window.loadAttentionData) {
-      window.loadAttentionData(query);
+    // Populate structured fields with extracted parameters for clarity
+    if (data.parsed) {
+      if (data.parsed.origin) document.getElementById('origin-input').value = data.parsed.origin;
+      if (data.parsed.destination) document.getElementById('dest-input').value = data.parsed.destination;
+      if (data.parsed.departure_time && data.parsed.departure_time !== 'now') {
+        document.getElementById('dep-time-input').value = data.parsed.departure_time;
+      }
+      if (data.parsed.mode) {
+        document.querySelectorAll('.mode-btn').forEach(b => {
+          b.classList.toggle('active', b.dataset.mode === data.parsed.mode);
+        });
+      }
     }
+
+    renderWorkflowResults(data);
   } catch (err) {
-    alert("Planning Error: " + err.message);
+    if (err.name === 'AbortError') {
+      alert("Search timed out. Please verify your origin/destination or try again.");
+    } else {
+      alert("Planning Error: " + err.message);
+    }
   } finally {
     sendBtn.textContent = "Compare Routes ➔";
     sendBtn.disabled = false;
@@ -359,10 +389,6 @@ async function triggerStructuredRouting() {
 
     const data = await res.json();
     renderWorkflowResults(data);
-
-    if (window.loadAttentionData) {
-      window.loadAttentionData(`Navigate from ${origin} to ${destination} by ${mode} at ${depTime}`);
-    }
   } catch (err) {
     alert("Routing Error: " + err.message);
   } finally {
@@ -646,31 +672,62 @@ function updateMapDisplay() {
     } catch(e) {}
   }
 
-  // Add Place Pins with Arrival-Time Dimming
+  // Add Place Pins with Arrival-Time Dimming & Category Filtering
+  const enabledCategories = getEnabledFeatureCategories();
+
   currentPlaces.forEach(p => {
+    // If category checkbox is unchecked in legend, skip
+    const cat = p.category || 'shop';
+    if (!enabledCategories.has(cat)) return;
+
     // If filtering by component, filter appropriately
     if (activeComponentFilter === 'cameras') return;
     if (activeComponentFilter === 'help_points' && !p.is_help_point) return;
     if (activeComponentFilter === 'open_places' && !p.is_open_at_arrival) return;
 
     const el = document.createElement('div');
-    el.className = 'place-marker-pin';
-    const catColor = CATEGORY_COLORS[p.category] || "#eab308";
+    el.className = `place-marker-pin pin-${cat}`;
+    const catColor = CATEGORY_COLORS[cat] || "#eab308";
     el.style.backgroundColor = catColor;
-    el.style.width = "12px";
-    el.style.height = "12px";
+
+    const isPolice = cat === 'police';
+    const isHospital = cat === 'hospital';
+    const isEmergency = isPolice || isHospital;
+
+    el.style.width = isEmergency ? "16px" : "12px";
+    el.style.height = isEmergency ? "16px" : "12px";
     el.style.borderRadius = "50%";
     el.style.border = "2px solid #ffffff";
-    el.style.boxShadow = "0 2px 6px rgba(0,0,0,0.6)";
+    el.style.cursor = "pointer";
+    el.style.boxShadow = isEmergency
+      ? `0 0 10px ${catColor}, 0 2px 8px rgba(0,0,0,0.85)`
+      : `0 0 6px ${catColor}88, 0 2px 5px rgba(0,0,0,0.6)`;
+    el.style.zIndex = isPolice ? "30" : (isHospital ? "28" : (p.is_help_point ? "25" : "15"));
+
+    // Subtle emoji icon for emergency help points
+    if (isPolice) {
+      el.innerHTML = '<span style="display:flex;align-items:center;justify-content:center;font-size:9px;line-height:1;margin-top:1px;">🛡️</span>';
+    } else if (isHospital) {
+      el.innerHTML = '<span style="display:flex;align-items:center;justify-content:center;font-size:9px;line-height:1;margin-top:1px;">🏥</span>';
+    }
+
     // Dim places closed at arrival time
     el.style.opacity = p.is_open_at_arrival !== false ? "1.0" : "0.35";
 
     const popupHtml = `
-      <div style="color:#000; font-size:12px;">
-        <strong>${p.name}</strong><br>
-        <span style="color:#666;">${p.display_category}</span><br>
-        <span>Hours: ${p.opening_hours || 'Not mapped (unknown)'}</span><br>
-        <span>Status at arrival: <b>${p.is_open_at_arrival ? '🟢 Open' : (p.is_24x7 ? '🟢 24/7' : '⚪ Closed / Reduced weight')}</b></span>
+      <div style="color:#0f172a; font-family:sans-serif; font-size:12px; line-height:1.4; min-width:180px;">
+        <div style="font-weight:700; font-size:13px; color:${catColor}; margin-bottom:2px;">
+          ${p.name || p.display_category}
+        </div>
+        <div style="color:#475569; font-size:11px; margin-bottom:4px;">
+          <b>Type:</b> ${p.display_category || cat} ${p.is_help_point ? '🛡️ Emergency Service' : ''}
+        </div>
+        <div style="color:#334155;">
+          <b>Hours:</b> ${p.opening_hours || (p.is_24x7 ? '24/7' : 'Standard hours')}
+        </div>
+        <div style="margin-top:4px;">
+          ${p.is_open_at_arrival ? '<span style="color:#15803d; font-weight:600;">● Open at arrival</span>' : (p.is_24x7 ? '<span style="color:#15803d; font-weight:600;">● Open 24/7</span>' : '<span style="color:#b45309; font-weight:500;">○ Closed / Dimmed</span>')}
+        </div>
       </div>
     `;
 
@@ -683,19 +740,21 @@ function updateMapDisplay() {
   });
 
   // Add Camera Pins
-  if (!activeComponentFilter || activeComponentFilter === 'cameras') {
+  if (enabledCategories.has('cameras') && (!activeComponentFilter || activeComponentFilter === 'cameras')) {
     currentCameras.forEach(c => {
       const el = document.createElement('div');
       el.className = 'camera-marker-pin';
       el.innerHTML = "📹";
       el.style.fontSize = "14px";
+      el.style.cursor = "pointer";
+      el.style.zIndex = "20";
       el.style.filter = "drop-shadow(0 2px 4px rgba(0,0,0,0.8))";
 
       const popupHtml = `
-        <div style="color:#000; font-size:12px;">
-          <strong>Surveillance Camera</strong><br>
-          <span>Type: ${c.type || 'CCTV'}</span><br>
-          <span>Operator: ${c.operator || 'Public / Safe City'}</span>
+        <div style="color:#0f172a; font-family:sans-serif; font-size:12px; line-height:1.4;">
+          <strong style="color:#38bdf8;">📹 Surveillance Camera</strong><br>
+          <span style="color:#475569;"><b>Type:</b> ${c.type || 'CCTV'}</span><br>
+          <span style="color:#475569;"><b>Operator:</b> ${c.operator || 'Public / Safe City'}</span>
         </div>
       `;
 
@@ -736,11 +795,7 @@ window.addEventListener('load', () => {
   initMap();
   setupAutocomplete('origin-input', 'origin-autocomplete');
   setupAutocomplete('dest-input', 'dest-autocomplete');
-
-  if (window.location.hash === '#attention' || window.location.hash === '#attn') {
-    const tabBtn = document.getElementById('tab-attn-btn');
-    if (tabBtn) tabBtn.click();
-  }
+  setupLegendFilters();
 
   // Support preloading routes via URL query parameters
   const urlParams = new URLSearchParams(window.location.search);

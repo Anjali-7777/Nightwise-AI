@@ -470,6 +470,19 @@ body.dark-theme {
 .dot-purple { background: #a855f7; }
 .dot-grey { background: #cbd5e1; }
 
+.place-marker-pin {
+  transition: transform 0.15s ease-in-out;
+}
+.place-marker-pin:hover {
+  transform: scale(1.35);
+}
+.camera-marker-pin {
+  transition: transform 0.15s ease-in-out;
+}
+.camera-marker-pin:hover {
+  transform: scale(1.3);
+}
+
 /* Sidebar Drawer */
 .sidebar-drawer {
   width: 440px;

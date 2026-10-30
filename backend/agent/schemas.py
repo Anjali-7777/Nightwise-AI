@@ -28,3 +28,10 @@ class AgentChatResponse(BaseModel):
     trade_off_summary: str
     trace: list[str]
     disclaimer: str
+    origin: Optional[dict] = None
+    destination: Optional[dict] = None
+    data_confidence: Optional[str] = None
+    confidence_warning: Optional[str] = None
+    trade_off: Optional[dict] = None
+    corridor_places: Optional[list[dict]] = None
+    corridor_cameras: Optional[list[dict]] = None

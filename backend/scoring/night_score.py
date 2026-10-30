@@ -83,26 +83,50 @@ def deduplicate_clusters(features: List[Dict[str, Any]], cluster_radius_m: float
     """
     if not features:
         return 0.0
+    n = len(features)
+    if n == 1:
+        return features[0].get("effective_weight", 1.0)
 
-    visited = set()
+    visited = bytearray(n)
     total_effective = 0.0
+    cluster_r_sq = cluster_radius_m * cluster_radius_m
 
-    for i, f1 in enumerate(features):
-        if i in visited:
+    # Use pre-projected metric coordinates if available, otherwise project
+    if "_x" in features[0] and "_y" in features[0]:
+        xs = np.fromiter((f["_x"] for f in features), dtype=np.float64, count=n)
+        ys = np.fromiter((f["_y"] for f in features), dtype=np.float64, count=n)
+    else:
+        ref_lat = features[0].get("lat", 0.0)
+        deg_rad = math.pi / 180.0
+        R = 6371000.0
+        kx = deg_rad * R * math.cos(math.radians(ref_lat))
+        ky = deg_rad * R
+        xs = np.fromiter((f.get("lon", 0.0) * kx for f in features), dtype=np.float64, count=n)
+        ys = np.fromiter((f.get("lat", 0.0) * ky for f in features), dtype=np.float64, count=n)
+
+    ws = np.fromiter((f.get("effective_weight", 1.0) for f in features), dtype=np.float64, count=n)
+
+    for i in range(n):
+        if visited[i]:
             continue
-        visited.add(i)
+        visited[i] = 1
+        xi = xs[i]
+        yi = ys[i]
+        w1 = ws[i]
         cluster_extras = 0.0
-        w1 = f1.get("effective_weight", 1.0)
 
-        for j in range(i + 1, len(features)):
-            if j in visited:
+        for j in range(i + 1, n):
+            if visited[j]:
                 continue
-            f2 = features[j]
-            d = haversine_m(f1["lat"], f1["lon"], f2["lat"], f2["lon"])
-            if d <= cluster_radius_m:
-                visited.add(j)
-                w2 = f2.get("effective_weight", 1.0)
-                cluster_extras += 0.3 * w2
+            dx = xi - xs[j]
+            if dx > cluster_radius_m or dx < -cluster_radius_m:
+                continue
+            dy = yi - ys[j]
+            if dy > cluster_radius_m or dy < -cluster_radius_m:
+                continue
+            if dx * dx + dy * dy <= cluster_r_sq:
+                visited[j] = 1
+                cluster_extras += 0.3 * ws[j]
 
         total_effective += (w1 + cluster_extras)
 
@@ -142,6 +166,7 @@ def score_route_v2(
 ) -> Dict[str, Any]:
     """
     Calculates the Night Activity Score (v2) across the 9 deterministic components.
+    Vectorized and metric-projected for high-performance sub-second evaluation.
     """
     if street_lamps is None:
         street_lamps = []
@@ -171,6 +196,16 @@ def score_route_v2(
     samples = resample_route(coords, interval_m=sample_interval_m)
     num_samples = len(samples)
 
+    ref_lat = coords[0][0]
+    deg_rad = math.pi / 180.0
+    R = 6371000.0
+    kx = deg_rad * R * math.cos(math.radians(ref_lat))
+    ky = deg_rad * R
+
+    samples_x = np.fromiter((s[1] * kx for s in samples), dtype=np.float64, count=num_samples)
+    samples_y = np.fromiter((s[0] * ky for s in samples), dtype=np.float64, count=num_samples)
+    samples_d = np.fromiter((s[2] for s in samples), dtype=np.float64, count=num_samples)
+
     # 2. Time-of-night factor dampener (01:00 - 04:00 gives 0.6x to general daytime shops)
     dep_hour = departure_time.hour
     is_deep_night = (1 <= dep_hour <= 4)
@@ -184,49 +219,51 @@ def score_route_v2(
     open_count = 0
     hours_mapped_count = 0
 
-    for p in places:
-        if not p.get("lat") or not p.get("lon"):
-            continue
-        # Find closest sample point to estimate arrival time
-        min_d = float("inf")
-        closest_sample = samples[0]
-        for s in samples:
-            d = haversine_m(s[0], s[1], p["lat"], p["lon"])
-            if d < min_d:
-                min_d = d
-                closest_sample = s
+    valid_places = [p for p in places if p.get("lat") and p.get("lon")]
+    corridor_limit = 150.0 if mode == "walking" else 250.0
+    corridor_limit_sq = corridor_limit * corridor_limit
 
-        # Discard if outside corridor buffer (150m walking, 250m driving)
-        corridor_limit = 150.0 if mode == "walking" else 250.0
-        if min_d > corridor_limit:
-            continue
+    if valid_places:
+        p_x = np.fromiter((p["lon"] * kx for p in valid_places), dtype=np.float64, count=len(valid_places))
+        p_y = np.fromiter((p["lat"] * ky for p in valid_places), dtype=np.float64, count=len(valid_places))
 
-        sample_dist = closest_sample[2]
-        travel_time_s = sample_dist / avg_speed
-        arrival_dt = departure_time + timedelta(seconds=travel_time_s)
+        dx = p_x[:, None] - samples_x[None, :]
+        dy = p_y[:, None] - samples_y[None, :]
+        dists_sq = dx * dx + dy * dy
+        min_sample_idx = dists_sq.argmin(axis=1)
+        min_d_sq = dists_sq[np.arange(len(valid_places)), min_sample_idx]
 
-        op_eval = check_opening_hours(p.get("opening_hours"), arrival_dt, p.get("category", "shop"))
-        w = op_eval["weight"]
-        if p.get("opening_hours"):
-            hours_mapped_count += 1
+        for i, p in enumerate(valid_places):
+            if min_d_sq[i] > corridor_limit_sq:
+                continue
+            s_idx = min_sample_idx[i]
+            sample_dist = samples_d[s_idx]
+            travel_time_s = sample_dist / avg_speed
+            arrival_dt = departure_time + timedelta(seconds=travel_time_s)
 
-        # Apply deep night dampener on non-essential / non-24x7 establishments
-        if is_deep_night and not op_eval["is_24x7"] and not p.get("is_help_point"):
-            w *= time_factor
+            op_eval = check_opening_hours(p.get("opening_hours"), arrival_dt, p.get("category", "shop"))
+            w = op_eval["weight"]
+            if p.get("opening_hours"):
+                hours_mapped_count += 1
 
-        p_copy = dict(p)
-        p_copy["effective_weight"] = w
-        p_copy["is_open_at_arrival"] = op_eval["is_open"]
-        p_copy["open_weight"] = w
+            if is_deep_night and not op_eval["is_24x7"] and not p.get("is_help_point"):
+                w *= time_factor
 
-        if w > 0.0:
-            evaluated_places.append(p_copy)
-            if op_eval["is_open"]:
-                unique_open_places.append(p_copy)
-                open_count += 1
-            if p.get("is_help_point"):
-                evaluated_help.append(p_copy)
-                unique_help_points.append(p_copy)
+            p_copy = dict(p)
+            p_copy["effective_weight"] = w
+            p_copy["is_open_at_arrival"] = op_eval["is_open"]
+            p_copy["open_weight"] = w
+            p_copy["_x"] = p_x[i]
+            p_copy["_y"] = p_y[i]
+
+            if w > 0.0:
+                evaluated_places.append(p_copy)
+                if op_eval["is_open"]:
+                    unique_open_places.append(p_copy)
+                    open_count += 1
+                if p.get("is_help_point"):
+                    evaluated_help.append(p_copy)
+                    unique_help_points.append(p_copy)
 
     # Effective cluster-deduplicated counts
     eff_places = deduplicate_clusters(evaluated_places, cluster_radius_m)
@@ -234,27 +271,50 @@ def score_route_v2(
 
     # 4. Transport Stops
     evaluated_transport = []
-    for t in transport:
-        if not t.get("lat") or not t.get("lon"):
-            continue
-        min_d = min(haversine_m(s[0], s[1], t["lat"], t["lon"]) for s in samples)
-        if min_d <= (120.0 if mode == "walking" else 200.0):
-            t_copy = dict(t)
-            t_copy["effective_weight"] = 1.0
-            evaluated_transport.append(t_copy)
+    valid_trans = [t for t in transport if t.get("lat") and t.get("lon")]
+    trans_limit = 120.0 if mode == "walking" else 200.0
+    trans_limit_sq = trans_limit * trans_limit
+
+    if valid_trans:
+        t_x = np.fromiter((t["lon"] * kx for t in valid_trans), dtype=np.float64, count=len(valid_trans))
+        t_y = np.fromiter((t["lat"] * ky for t in valid_trans), dtype=np.float64, count=len(valid_trans))
+        dx = t_x[:, None] - samples_x[None, :]
+        dy = t_y[:, None] - samples_y[None, :]
+        min_d_sq = (dx * dx + dy * dy).min(axis=1)
+
+        for i, t in enumerate(valid_trans):
+            if min_d_sq[i] <= trans_limit_sq:
+                t_copy = dict(t)
+                t_copy["effective_weight"] = 1.0
+                t_copy["_x"] = t_x[i]
+                t_copy["_y"] = t_y[i]
+                evaluated_transport.append(t_copy)
 
     eff_transport = deduplicate_clusters(evaluated_transport, cluster_radius_m)
 
     # 5. Surveillance Cameras
     evaluated_cams = []
-    for c in cameras:
-        if not c.get("lat") or not c.get("lon"):
-            continue
-        min_d = min(haversine_m(s[0], s[1], c["lat"], c["lon"]) for s in samples)
-        if min_d <= (80.0 if mode == "walking" else 150.0):
-            c_copy = dict(c)
-            c_copy["effective_weight"] = 1.0
-            evaluated_cams.append(c_copy)
+    valid_cams = [c for c in cameras if c.get("lat") and c.get("lon")]
+    cam_limit = 80.0 if mode == "walking" else 150.0
+    cam_limit_sq = cam_limit * cam_limit
+
+    if valid_cams:
+        c_x = np.fromiter((c["lon"] * kx for c in valid_cams), dtype=np.float64, count=len(valid_cams))
+        c_y = np.fromiter((c["lat"] * ky for c in valid_cams), dtype=np.float64, count=len(valid_cams))
+        dx = c_x[:, None] - samples_x[None, :]
+        dy = c_y[:, None] - samples_y[None, :]
+        dists_sq = dx * dx + dy * dy
+        min_sample_idx = dists_sq.argmin(axis=1)
+        min_d_sq = dists_sq[np.arange(len(valid_cams)), min_sample_idx]
+
+        for i, c in enumerate(valid_cams):
+            if min_d_sq[i] <= cam_limit_sq:
+                c_copy = dict(c)
+                c_copy["effective_weight"] = 1.0
+                c_copy["_x"] = c_x[i]
+                c_copy["_y"] = c_y[i]
+                c_copy["_closest_sample_dist"] = samples_d[min_sample_idx[i]]
+                evaluated_cams.append(c_copy)
 
     eff_cams = deduplicate_clusters(evaluated_cams, cluster_radius_m)
 
@@ -262,27 +322,29 @@ def score_route_v2(
     num_windows = max(1, int(math.ceil(dist_m / 200.0)))
     window_cams = [0] * num_windows
     for c in evaluated_cams:
-        # find window
-        closest_sample_dist = min(s[2] for s in samples if haversine_m(s[0], s[1], c["lat"], c["lon"]) <= 80.0) if samples else 0.0
+        closest_sample_dist = c.get("_closest_sample_dist", 0.0)
         w_idx = min(num_windows - 1, int(closest_sample_dist // 200.0))
         window_cams[w_idx] += 1
     camera_spread = sum(1 for cnt in window_cams if cnt > 0) / float(num_windows)
 
     # 6. Sample Coverage & Gaps Analysis
-    covered_mask = [False] * num_samples
     all_covering_features = evaluated_places + evaluated_help + evaluated_transport + evaluated_cams
+    cov_radius_sq = coverage_radius_m * coverage_radius_m
 
-    for i, s in enumerate(samples):
-        for f in all_covering_features:
-            if haversine_m(s[0], s[1], f["lat"], f["lon"]) <= coverage_radius_m:
-                covered_mask[i] = True
-                break
+    if all_covering_features:
+        cov_x = np.fromiter((f["_x"] for f in all_covering_features), dtype=np.float64, count=len(all_covering_features))
+        cov_y = np.fromiter((f["_y"] for f in all_covering_features), dtype=np.float64, count=len(all_covering_features))
+        dx = samples_x[:, None] - cov_x[None, :]
+        dy = samples_y[:, None] - cov_y[None, :]
+        covered_mask = ((dx * dx + dy * dy) <= cov_radius_sq).any(axis=1)
+    else:
+        covered_mask = np.zeros(num_samples, dtype=bool)
 
     # Calculate gaps
     gaps_m = []
     current_gap = 0.0
     for i in range(1, num_samples):
-        d_step = samples[i][2] - samples[i-1][2]
+        d_step = samples_d[i] - samples_d[i-1]
         if not covered_mask[i]:
             current_gap += d_step
         else:
@@ -298,9 +360,9 @@ def score_route_v2(
 
     # Evenness using coefficient of variation over 200m windows
     window_covered = [0] * num_windows
-    for i, s in enumerate(samples):
+    for i in range(num_samples):
         if covered_mask[i]:
-            w_idx = min(num_windows - 1, int(s[2] // 200.0))
+            w_idx = min(num_windows - 1, int(samples_d[i] // 200.0))
             window_covered[w_idx] += 1
     mean_cov = float(np.mean(window_covered)) if window_covered else 0.0
     std_cov = float(np.std(window_covered)) if window_covered else 0.0
@@ -320,32 +382,42 @@ def score_route_v2(
     lit_road_samples = 0
     total_road_eval = 0
 
-    for s in samples:
-        # Match nearest road
-        closest_r = None
-        min_rd = float("inf")
-        for r in roads:
-            if r.get("lat") and r.get("lon"):
-                rd = haversine_m(s[0], s[1], r["lat"], r["lon"])
-                if rd < min_rd:
-                    min_rd = rd
-                    closest_r = r
-        if closest_r and min_rd < 50.0:
-            total_road_eval += 1
-            if closest_r.get("highway") in main_classes:
-                main_road_samples += 1
-            if closest_r.get("is_lit") is True:
-                lit_road_samples += 1
+    valid_roads = [r for r in roads if r.get("lat") and r.get("lon")]
+    if valid_roads:
+        r_x = np.fromiter((r["lon"] * kx for r in valid_roads), dtype=np.float64, count=len(valid_roads))
+        r_y = np.fromiter((r["lat"] * ky for r in valid_roads), dtype=np.float64, count=len(valid_roads))
+        dx = samples_x[:, None] - r_x[None, :]
+        dy = samples_y[:, None] - r_y[None, :]
+        dists_sq = dx * dx + dy * dy
+        min_rd_idx = dists_sq.argmin(axis=1)
+        min_rd_sq = dists_sq[np.arange(num_samples), min_rd_idx]
+
+        road_thresh_sq = 50.0 * 50.0
+        for i in range(num_samples):
+            if min_rd_sq[i] < road_thresh_sq:
+                total_road_eval += 1
+                closest_r = valid_roads[min_rd_idx[i]]
+                if closest_r.get("highway") in main_classes:
+                    main_road_samples += 1
+                if closest_r.get("is_lit") is True:
+                    lit_road_samples += 1
 
     main_road_ratio = (main_road_samples / max(1, total_road_eval)) if total_road_eval > 0 else 0.75
     lit_tag_coverage = (lit_road_samples / max(1, total_road_eval)) if total_road_eval > 0 else 0.0
 
     # 8. Street Lamps
+    valid_lamps = [l for l in street_lamps if l.get("lat") and l.get("lon")]
     close_lamps = []
-    for l in street_lamps:
-        if l.get("lat") and l.get("lon"):
-            if min(haversine_m(s[0], s[1], l["lat"], l["lon"]) for s in samples) <= 30.0:
+    if valid_lamps:
+        l_x = np.fromiter((l["lon"] * kx for l in valid_lamps), dtype=np.float64, count=len(valid_lamps))
+        l_y = np.fromiter((l["lat"] * ky for l in valid_lamps), dtype=np.float64, count=len(valid_lamps))
+        dx = l_x[:, None] - samples_x[None, :]
+        dy = l_y[:, None] - samples_y[None, :]
+        min_lamp_sq = (dx * dx + dy * dy).min(axis=1)
+        for i, l in enumerate(valid_lamps):
+            if min_lamp_sq[i] <= 30.0 * 30.0:
                 close_lamps.append(l)
+
     lamp_density_per_km = len(close_lamps) / dist_km
 
     # 9. Turns (simplicity)
@@ -353,13 +425,17 @@ def score_route_v2(
     turns_per_km = num_turns / dist_km
 
     # 10. Surroundings (isolating land use)
-    isolated_samples = 0
-    for s in samples:
-        for u in isolating_landuse:
-            if u.get("lat") and u.get("lon"):
-                if haversine_m(s[0], s[1], u["lat"], u["lon"]) <= 80.0:
-                    isolated_samples += 1
-                    break
+    valid_iso = [u for u in isolating_landuse if u.get("lat") and u.get("lon")]
+    if valid_iso:
+        iso_x = np.fromiter((u["lon"] * kx for u in valid_iso), dtype=np.float64, count=len(valid_iso))
+        iso_y = np.fromiter((u["lat"] * ky for u in valid_iso), dtype=np.float64, count=len(valid_iso))
+        dx = samples_x[:, None] - iso_x[None, :]
+        dy = samples_y[:, None] - iso_y[None, :]
+        isolated_mask = ((dx * dx + dy * dy) <= 80.0 * 80.0).any(axis=1)
+        isolated_samples = int(np.sum(isolated_mask))
+    else:
+        isolated_samples = 0
+
     isolation_share = isolated_samples / max(1, num_samples)
 
     # -------------------------------------------------------------

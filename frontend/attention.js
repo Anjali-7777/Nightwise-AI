@@ -3,11 +3,13 @@
 // ==========================================================================
 
 let attentionPayload = null;
+let loadedText = null;
 let selectedTokenIndex = null;
 let currentLayer = 0;
 let currentHead = 'avg';
 
 window.loadAttentionData = async function(text) {
+  if (attentionPayload && loadedText === text) return;
   try {
     const res = await fetch('/api/attention', {
       method: 'POST',
@@ -15,6 +17,7 @@ window.loadAttentionData = async function(text) {
       body: JSON.stringify({ text: text })
     });
     if (!res.ok) return;
+    loadedText = text;
     attentionPayload = await res.json();
     initAttentionView();
   } catch (err) {
